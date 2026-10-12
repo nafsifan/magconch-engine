@@ -1,0 +1,31 @@
+name: magconch-engine
+version: '${project.version}'
+main: com.magconch.engine.MagconchEngine
+api-version: '1.20'
+authors: [ MagconchTeam ]
+description: Minecraft Server Modular Engine Core Plugin
+
+commands:
+  magconch:
+    description: Magconch Engine 核心管理命令
+    aliases: [ magc ]
+    permission: magconch.command.use
+    usage: /<command> [subcommand]
+
+permissions:
+  magconch.admin:
+    description: 拥有核心引擎所有管理权限
+    default: op
+    children:
+      magconch.command.use: true
+      magconch.command.reload: true
+      magconch.command.modules: true
+  magconch.command.use:
+    description: 允许查看基础信息与帮助
+    default: true
+  magconch.command.reload:
+    description: 允许重载核心引擎与模块配置
+    default: op
+  magconch.command.modules:
+    description: 允许查看模块运行状态
+    default: op

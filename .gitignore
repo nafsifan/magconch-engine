@@ -1,0 +1,44 @@
+# Maven 构建生成产物
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA 缓存与工程文件
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse 工程文件
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# VS Code 配置
+.vscode/
+
+# 操作系统临时与索引文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 运行时日志与测试服务器产物
+*.log
+run/
+server/

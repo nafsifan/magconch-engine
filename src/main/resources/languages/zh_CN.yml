@@ -1,0 +1,36 @@
+# ========================================================
+# Magconch Engine 语言文本包 (简体中文 - zh_CN)
+# ========================================================
+
+prefix: "&#4096ff&lMAGCONCH &#8c8c8c› &#d9d9d9"
+
+general:
+  no_permission: "{prefix}&#ff4d4f暂无执行权限。"
+  unknown_command: "{prefix}&#ff4d4f未找到该指令，请输入 &#f0f0f0/magc help &#ff4d4f查看可用指令。"
+  player_only: "{prefix}&#ff4d4f该指令只能在游戏内使用。"
+  console_only: "{prefix}&#ff4d4f该指令只能在控制台执行。"
+
+reload:
+  start: "{prefix}&#d9d9d9正在重新加载配置与模块..."
+  success: "{prefix}&#52c41a已完成重新加载 &#8c8c8c(&#597ef7{time}ms&#8c8c8c)"
+  failure: "{prefix}&#ff4d4f重新加载失败，请查看后台报错日志。"
+
+modules:
+  header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0功能模块清单 &#8c8c8c(&#597ef7{count}&#8c8c8c)"
+  item_format: "  &#8c8c8c› &#f0f0f0{name} &#8c8c8c(&#8c8c8c{id}&#8c8c8c) &#8c8c8c· {status}"
+  status_enabled: "&#52c41a● 运行中"
+  status_disabled: "&#8c8c8c○ 已停用"
+  footer: ""
+
+help:
+  header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0可用指令手册"
+  item_format: "  &#8c8c8c/&#f0f0f0{command} &#4096ff{subcommand} &#8c8c8c— &#d9d9d9{description}"
+  footer: ""
+
+commands:
+  help:
+    description: "查看指令帮助"
+  reload:
+    description: "重新加载插件"
+  modules:
+    description: "查看模块状态"

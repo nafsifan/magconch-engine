@@ -1,0 +1,36 @@
+# ========================================================
+# Magconch Engine Language Pack (English - en_US)
+# ========================================================
+
+prefix: "&#4096ff&lMAGCONCH &#8c8c8c› &#d9d9d9"
+
+general:
+  no_permission: "{prefix}&#ff4d4fNo permission to execute this action."
+  unknown_command: "{prefix}&#ff4d4fCommand not found. Use &#f0f0f0/magc help &#ff4d4ffor help."
+  player_only: "{prefix}&#ff4d4fThis command can only be used in-game."
+  console_only: "{prefix}&#ff4d4fThis command can only be used from console."
+
+reload:
+  start: "{prefix}&#d9d9d9Reloading configurations and modules..."
+  success: "{prefix}&#52c41aReloaded successfully &#8c8c8c(&#597ef7{time}ms&#8c8c8c)"
+  failure: "{prefix}&#ff4d4fReload failed, please check server console."
+
+modules:
+  header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0Modules &#8c8c8c(&#597ef7{count}&#8c8c8c)"
+  item_format: "  &#8c8c8c› &#f0f0f0{name} &#8c8c8c(&#8c8c8c{id}&#8c8c8c) &#8c8c8c· {status}"
+  status_enabled: "&#52c41a● RUNNING"
+  status_disabled: "&#8c8c8c○ STOPPED"
+  footer: ""
+
+help:
+  header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0Commands"
+  item_format: "  &#8c8c8c/&#f0f0f0{command} &#4096ff{subcommand} &#8c8c8c— &#d9d9d9{description}"
+  footer: ""
+
+commands:
+  help:
+    description: "View available commands"
+  reload:
+    description: "Reload plugin"
+  modules:
+    description: "View module status"
