@@ -62,7 +62,6 @@ public class ModulesCommand implements SubCommand {
         for (EngineModule module : modules) {
             String status = module.isEnabled() ? statusEnabled : statusDisabled;
             String line = itemFormat
-                    .replace("{name}", module.getName())
                     .replace("{id}", module.getId())
                     .replace("{status}", status);
             sender.sendMessage(TextUtil.colorize(line));

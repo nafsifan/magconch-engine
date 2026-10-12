@@ -17,7 +17,7 @@ reload:
 
 modules:
   header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0Modules &#8c8c8c(&#597ef7{count}&#8c8c8c)"
-  item_format: "  &#8c8c8c› &#f0f0f0{name} &#8c8c8c(&#8c8c8c{id}&#8c8c8c) &#8c8c8c· {status}"
+  item_format: "  &#8c8c8c› &#f0f0f0{id} &#8c8c8c· {status}"
   status_enabled: "&#52c41a● RUNNING"
   status_disabled: "&#8c8c8c○ STOPPED"
   footer: ""
@@ -27,6 +27,12 @@ help:
   item_format: "  &#8c8c8c/&#f0f0f0{command} &#4096ff{subcommand} &#8c8c8c— &#d9d9d9{description}"
   footer: ""
 
+undo:
+  reverted: "&#4096ff› &#d9d9d9Undid current block"
+  toggle_on: "&#4096ff› &#d9d9d9Block undo enabled"
+  toggle_off: "&#8c8c8c› &#8c8c8cBlock undo disabled"
+  disabled_module: "{prefix}&#ff4d4fBlock undo feature is currently disabled."
+
 commands:
   help:
     description: "View available commands"
@@ -34,3 +40,5 @@ commands:
     description: "Reload plugin"
   modules:
     description: "View module status"
+  undo:
+    description: "Toggle block undo"

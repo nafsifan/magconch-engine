@@ -55,9 +55,6 @@ public class SampleModule implements EngineModule {
     public String getId() { return "sample"; }
 
     @Override
-    public String getName() { return "示例模块"; }
-
-    @Override
     public void onEnable() {
         // 注册事件监听器、任务调度等
     }

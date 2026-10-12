@@ -17,7 +17,7 @@ reload:
 
 modules:
   header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0功能模块清单 &#8c8c8c(&#597ef7{count}&#8c8c8c)"
-  item_format: "  &#8c8c8c› &#f0f0f0{name} &#8c8c8c(&#8c8c8c{id}&#8c8c8c) &#8c8c8c· {status}"
+  item_format: "  &#8c8c8c› &#f0f0f0{id} &#8c8c8c· {status}"
   status_enabled: "&#52c41a● 运行中"
   status_disabled: "&#8c8c8c○ 已停用"
   footer: ""
@@ -27,6 +27,12 @@ help:
   item_format: "  &#8c8c8c/&#f0f0f0{command} &#4096ff{subcommand} &#8c8c8c— &#d9d9d9{description}"
   footer: ""
 
+undo:
+  reverted: "&#4096ff› &#d9d9d9已撤回当前方块"
+  toggle_on: "&#4096ff› &#d9d9d9已开启方块撤回"
+  toggle_off: "&#8c8c8c› &#8c8c8c已关闭方块撤回"
+  disabled_module: "{prefix}&#ff4d4f方块撤回功能当前未启用。"
+
 commands:
   help:
     description: "查看指令帮助"
@@ -34,3 +40,5 @@ commands:
     description: "重新加载插件"
   modules:
     description: "查看模块状态"
+  undo:
+    description: "切换方块撤回开关"

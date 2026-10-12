@@ -47,7 +47,7 @@ public class ModuleManager {
         }
 
         modules.put(id, module);
-        plugin.getLogger().info("已注册核心模块: " + module.getName() + " (" + id + ")");
+        plugin.getLogger().info("已注册核心模块: " + id);
     }
 
     /**
@@ -106,7 +106,7 @@ public class ModuleManager {
                 try {
                     module.onEnable();
                     module.setEnabled(true);
-                    plugin.getLogger().info("模块 [" + module.getName() + "] 已成功启用。");
+                    plugin.getLogger().info("模块 [" + module.getId() + "] 已成功启用。");
                 } catch (Exception e) {
                     plugin.getLogger().log(Level.SEVERE, "启用模块 [" + module.getId() + "] 时发生严重异常: ", e);
                 }
@@ -123,7 +123,7 @@ public class ModuleManager {
                 try {
                     module.onDisable();
                     module.setEnabled(false);
-                    plugin.getLogger().info("模块 [" + module.getName() + "] 已安全停用。");
+                    plugin.getLogger().info("模块 [" + module.getId() + "] 已安全停用。");
                 } catch (Exception e) {
                     plugin.getLogger().log(Level.SEVERE, "停用模块 [" + module.getId() + "] 时发生异常: ", e);
                 }
