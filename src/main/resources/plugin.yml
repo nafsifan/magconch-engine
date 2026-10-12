@@ -11,6 +11,10 @@ commands:
     aliases: [ magc ]
     permission: magconch.command.use
     usage: /<command> [subcommand]
+  fly:
+    description: 切换生存饥饿飞行模式
+    permission: magconch.flight.use
+    usage: /<command>
 
 permissions:
   magconch.admin:
@@ -21,6 +25,7 @@ permissions:
       magconch.command.reload: true
       magconch.command.modules: true
       magconch.use.undo: true
+      magconch.flight.use: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -32,4 +37,7 @@ permissions:
     default: op
   magconch.use.undo:
     description: 允许使用方块防误放撤回功能
+    default: true
+  magconch.flight.use:
+    description: 允许切换生存饥饿飞行模式
     default: true

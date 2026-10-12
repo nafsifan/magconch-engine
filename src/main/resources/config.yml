@@ -28,3 +28,15 @@ modules:
       - ".*SHULKER_BOX$"
       - "POWDER_SNOW_BUCKET"
       - "FLINT_AND_STEEL"
+
+  # 生存飞行模块
+  flight:
+    enabled: true
+    # 饱食度消耗设置
+    hunger:
+      # 最低允许飞行的饱食度（低于此值无法起飞，空中直接关飞坠落）
+      min-food-level: 6
+      # 飞行持续消耗间隔（秒）
+      interval-seconds: 20
+      # 每次消耗点数（1 点 = 半个鸡腿，优先扣饱和度）
+      cost-per-interval: 1

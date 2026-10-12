@@ -33,6 +33,13 @@ undo:
   toggle_off: "&#8c8c8c› &#8c8c8cBlock undo disabled"
   disabled_module: "{prefix}&#ff4d4fBlock undo feature is currently disabled."
 
+flight:
+  enabled: "{prefix}&#52c41aSurvival flight mode enabled."
+  disabled: "{prefix}&#ff4d4fSurvival flight mode disabled."
+  too_hungry: "{prefix}&#ff4d4fFood level too low to fly."
+  exhausted: "{prefix}&#ff4d4fFood level exhausted, flight stopped!"
+  disabled_module: "{prefix}&#ff4d4fFlight feature is currently disabled."
+
 commands:
   help:
     description: "View available commands"
@@ -42,3 +49,5 @@ commands:
     description: "View module status"
   undo:
     description: "Toggle block undo"
+  fly:
+    description: "Toggle survival flight mode"

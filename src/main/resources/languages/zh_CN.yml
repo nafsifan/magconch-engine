@@ -33,6 +33,13 @@ undo:
   toggle_off: "&#8c8c8c› &#8c8c8c已关闭方块撤回"
   disabled_module: "{prefix}&#ff4d4f方块撤回功能当前未启用。"
 
+flight:
+  enabled: "{prefix}&#52c41a已开启饥饿飞行模式。"
+  disabled: "{prefix}&#ff4d4f已关闭饥饿飞行模式。"
+  too_hungry: "{prefix}&#ff4d4f当前饱食度过低，无法起飞。"
+  exhausted: "{prefix}&#ff4d4f饱食度耗尽，已停止飞行！"
+  disabled_module: "{prefix}&#ff4d4f生存飞行功能当前未启用。"
+
 commands:
   help:
     description: "查看指令帮助"
@@ -42,3 +49,5 @@ commands:
     description: "查看模块状态"
   undo:
     description: "切换方块撤回开关"
+  fly:
+    description: "切换生存飞行模式"
