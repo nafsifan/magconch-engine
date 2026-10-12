@@ -1,6 +1,7 @@
 package com.magconch.engine.core;
 
 import com.magconch.engine.MagconchEngine;
+import com.magconch.engine.util.ConfigUpdater;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -45,7 +46,13 @@ public class ConfigManager {
         saveDefaultResource("languages/zh_CN.yml");
         saveDefaultResource("languages/en_US.yml");
 
-        // 2. 加载主配置文件内容
+        // 自动补齐缺失配置项
+        int addedKeys = ConfigUpdater.update(plugin, "config.yml", configFile);
+        if (addedKeys > 0) {
+            plugin.getLogger().info("核心配置 config.yml 已自动补齐 " + addedKeys + " 项新配置。");
+        }
+
+        // 3. 加载主配置文件内容
         reload();
     }
 

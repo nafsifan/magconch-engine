@@ -1,6 +1,7 @@
 package com.magconch.engine.core;
 
 import com.magconch.engine.MagconchEngine;
+import com.magconch.engine.util.ConfigUpdater;
 import com.magconch.engine.util.TextUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,7 +18,7 @@ import java.util.logging.Level;
 /**
  * 国际化多语言管理服务
  * <p>
- * 负责解析加载对应语言包、动态占位符替换（支持前缀、玩家名等上下文）与终端发信。
+ * 负责解析加载对应语言包、动态占位符替换与终端发信。
  */
 public class LanguageManager {
 
@@ -52,9 +53,17 @@ public class LanguageManager {
             langFile = new File(plugin.getDataFolder(), "languages/zh_CN.yml");
         }
 
+        // 自动补齐缺失语言键
+        String resourcePath = "languages/" + currentLanguage + ".yml";
+        int addedKeys = ConfigUpdater.update(plugin, resourcePath, langFile);
+        if (addedKeys > 0) {
+            plugin.getLogger().info("语言文件 " + langFile.getName() + " 已自动补齐 " + addedKeys + " 项新语言键。");
+        }
+
+        // 加载本地磁盘语言配置 (服主自定义优先)
         this.langConfig = YamlConfiguration.loadConfiguration(langFile);
 
-        // 加载 jar 内置资源作为默认回退，保障配置缺失时仍能正常取词
+        // 加载 jar 内置资源作为默认回退，新版本新增词条自动透明兜底，永不覆写服主磁盘文件
         InputStream defStream = plugin.getResource("languages/" + currentLanguage + ".yml");
         if (defStream != null) {
             YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream, StandardCharsets.UTF_8));
