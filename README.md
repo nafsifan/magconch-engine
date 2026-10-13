@@ -22,7 +22,7 @@ mvn clean package
 ```
 
 编译产物将生成在 `target/` 目录下：
-- `target/magconch-engine-1.0.0-SNAPSHOT.jar`
+- `target/MagconchEngine-1.0.0-SNAPSHOT.jar`
 
 ---
 
@@ -86,7 +86,7 @@ MagconchEngine.getInstance().getModuleManager().registerModule(new SampleModule(
 
 ## 🌐 国际化与视觉设计
 
-语言文件位于 `plugins/magconch-engine/languages/`：
+语言文件位于 `plugins/MagconchEngine/languages/`：
 - `zh_CN.yml`：默认简体中文
 - `en_US.yml`：英文对照语言包
 

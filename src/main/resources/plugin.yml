@@ -1,4 +1,4 @@
-name: magconch-engine
+name: MagconchEngine
 version: '${project.version}'
 main: com.magconch.engine.MagconchEngine
 api-version: '1.20'

@@ -9,7 +9,7 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>magconch-engine</name>
+    <name>MagconchEngine</name>
     <description>Minecraft Server Modular Engine Core Plugin</description>
 
     <properties>
