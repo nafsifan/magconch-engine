@@ -46,6 +46,11 @@ teleport-cost:
   warmup_notice: "{prefix}&#d9d9d9本次传送预计消耗 &#fadb14{cost} &#d9d9d9点经验 &#8c8c8c(移动可取消)"
   deducted: "{prefix}&#52c41a已消耗 &#fadb14{cost} &#52c41a点经验完成传送。"
 
+trash:
+  title: "&#fa541c&l垃圾桶 &#8c8c8c(关闭即销毁)"
+  opened: "{prefix}&#d9d9d9已打开垃圾桶，放入物品并关闭窗口即可销毁。"
+  disabled_module: "{prefix}&#ff4d4f垃圾桶功能当前未启用。"
+
 commands:
   help:
     description: "查看指令帮助"
@@ -57,3 +62,5 @@ commands:
     description: "切换方块撤回开关"
   fly:
     description: "切换生存飞行模式"
+  trash:
+    description: "打开垃圾桶界面"

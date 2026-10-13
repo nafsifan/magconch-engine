@@ -46,6 +46,11 @@ teleport-cost:
   warmup_notice: "{prefix}&#d9d9d9Estimated teleport cost: &#fadb14{cost} &#d9d9d9exp &#8c8c8c(move to cancel)"
   deducted: "{prefix}&#52c41aConsumed &#fadb14{cost} &#52c41aexp to complete teleportation."
 
+trash:
+  title: "&#fa541c&lTrash Can &#8c8c8c(Close to discard)"
+  opened: "{prefix}&#d9d9d9Trash can opened. Items will be discarded upon closing."
+  disabled_module: "{prefix}&#ff4d4fTrash feature is currently disabled."
+
 commands:
   help:
     description: "View available commands"
@@ -57,3 +62,5 @@ commands:
     description: "Toggle block undo"
   fly:
     description: "Toggle survival flight mode"
+  trash:
+    description: "Open disposal trash can"

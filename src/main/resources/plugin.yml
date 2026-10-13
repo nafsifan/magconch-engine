@@ -16,6 +16,11 @@ commands:
     description: 切换生存饥饿飞行模式
     permission: magconch.flight.use
     usage: /<command>
+  trash:
+    description: 打开垃圾桶界面销毁物品
+    aliases: [ ljt ]
+    permission: magconch.trash.use
+    usage: /<command>
 
 permissions:
   magconch.admin:
@@ -27,6 +32,7 @@ permissions:
       magconch.command.modules: true
       magconch.use.undo: true
       magconch.flight.use: true
+      magconch.trash.use: true
       magconch.teleportcost.bypass: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
@@ -42,6 +48,9 @@ permissions:
     default: true
   magconch.flight.use:
     description: 允许切换生存饥饿飞行模式
+    default: true
+  magconch.trash.use:
+    description: 允许使用垃圾桶销毁物品
     default: true
   magconch.teleportcost.bypass:
     description: 豁免传送距离经验扣费
