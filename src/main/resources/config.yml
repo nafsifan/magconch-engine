@@ -17,17 +17,6 @@ modules:
     timeout: 2
     # 是否需要权限校验 (magconch.use.undo)
     check-permission: true
-    # 黑名单材质正则或名称（排除容器、双格复合方块及特殊物品以防止刷物品）
-    blacklist-materials:
-      - "DRAGON_EGG"
-      - ".*_DOOR$"
-      - ".*_BED$"
-      - "CHEST"
-      - "TRAPPED_CHEST"
-      - "BARREL"
-      - ".*SHULKER_BOX$"
-      - "POWDER_SNOW_BUCKET"
-      - "FLINT_AND_STEEL"
 
   # 生存飞行模块
   flight:

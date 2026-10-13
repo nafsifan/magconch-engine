@@ -5,7 +5,6 @@ import com.magconch.engine.api.EngineModule;
 import com.magconch.engine.modules.undo.command.UndoCommand;
 import com.magconch.engine.modules.undo.listener.UndoBlockListener;
 import com.magconch.engine.modules.undo.model.PlacementRecord;
-import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -14,12 +13,10 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 /**
  * 方块撤回功能模块实现
@@ -36,8 +33,7 @@ public class BlockUndoModule implements EngineModule {
 
     private final MagconchEngine plugin;
     private final NamespacedKey disabledPdcKey;
-    private final Map<Location, PlacementRecord> recordMap = new ConcurrentHashMap<>();
-    private final List<Pattern> blacklistPatterns = new ArrayList<>();
+    private final Map<UUID, PlacementRecord> recordMap = new ConcurrentHashMap<>();
 
     private boolean enabled;
     private long timeoutMillis = 2000L;
@@ -93,7 +89,6 @@ public class BlockUndoModule implements EngineModule {
 
         // 清空内存记录
         recordMap.clear();
-        blacklistPatterns.clear();
     }
 
     @Override
@@ -123,17 +118,6 @@ public class BlockUndoModule implements EngineModule {
         int timeoutSec = config.getInt(path + "timeout", 2);
         this.timeoutMillis = timeoutSec * 1000L;
         this.checkPermission = config.getBoolean(path + "check-permission", true);
-
-        // 加载黑名单材质正则匹配项
-        blacklistPatterns.clear();
-        List<String> list = config.getStringList(path + "blacklist-materials");
-        for (String regex : list) {
-            try {
-                blacklistPatterns.add(Pattern.compile(regex));
-            } catch (Exception e) {
-                plugin.getLogger().warning("无效的黑名单材质正则模式: " + regex);
-            }
-        }
     }
 
     private void startCleanupTask() {
@@ -147,9 +131,9 @@ public class BlockUndoModule implements EngineModule {
                 return;
             }
             long now = System.currentTimeMillis();
-            Iterator<Map.Entry<Location, PlacementRecord>> it = recordMap.entrySet().iterator();
+            Iterator<Map.Entry<UUID, PlacementRecord>> it = recordMap.entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry<Location, PlacementRecord> entry = it.next();
+                Map.Entry<UUID, PlacementRecord> entry = it.next();
                 if (now - entry.getValue().getTimestamp() > timeoutMillis) {
                     it.remove();
                 }
@@ -160,18 +144,6 @@ public class BlockUndoModule implements EngineModule {
     // ==========================================
     // 业务判定与安全工具
     // ==========================================
-
-    /**
-     * 判断指定材质名是否命中黑名单
-     */
-    public boolean isBlacklisted(String materialName) {
-        for (Pattern pattern : blacklistPatterns) {
-            if (pattern.matcher(materialName).matches()) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * 判定指定玩家是否开启撤回功能并具备权限
@@ -200,7 +172,7 @@ public class BlockUndoModule implements EngineModule {
     // Getter
     // ==========================================
 
-    public Map<Location, PlacementRecord> getRecordMap() {
+    public Map<UUID, PlacementRecord> getRecordMap() {
         return recordMap;
     }
 
