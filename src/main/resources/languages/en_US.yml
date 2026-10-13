@@ -40,6 +40,11 @@ flight:
   exhausted: "{prefix}&#ff4d4fFood level exhausted, flight stopped!"
   disabled_module: "{prefix}&#ff4d4fFlight feature is currently disabled."
 
+teleport-cost:
+  insufficient: "{prefix}&#ff4d4fInsufficient experience! Requires &#fadb14{cost} &#ff4d4fexp, you only have &#fadb14{current} &#ff4d4fexp."
+  warmup_notice: "{prefix}&#d9d9d9Estimated teleport cost: &#fadb14{cost} &#d9d9d9exp &#8c8c8c(move to cancel)"
+  deducted: "{prefix}&#52c41aConsumed &#fadb14{cost} &#52c41aexp to complete teleportation."
+
 commands:
   help:
     description: "View available commands"

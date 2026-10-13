@@ -5,6 +5,7 @@ import com.magconch.engine.core.ConfigManager;
 import com.magconch.engine.core.LanguageManager;
 import com.magconch.engine.core.ModuleManager;
 import com.magconch.engine.modules.flight.FlightModule;
+import com.magconch.engine.modules.teleportcost.TeleportCostModule;
 import com.magconch.engine.modules.undo.BlockUndoModule;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -70,6 +71,7 @@ public class MagconchEngine extends JavaPlugin {
             // 5. 挂载子系统模块
             this.moduleManager.registerModule(new BlockUndoModule(this));
             this.moduleManager.registerModule(new FlightModule(this));
+            this.moduleManager.registerModule(new TeleportCostModule(this));
 
             // 6. 统一调度启用所有挂载模块
             this.moduleManager.enableAll();

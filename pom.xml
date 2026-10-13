@@ -16,6 +16,7 @@
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spigot.version>1.20.4-R0.1-SNAPSHOT</spigot.version>
+        <huskhomes.version>4.9.9</huskhomes.version>
     </properties>
 
     <repositories>
@@ -29,6 +30,11 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
+        <!-- William278 官方镜像源 (HuskHomes API) -->
+        <repository>
+            <id>william278-releases</id>
+            <url>https://repo.william278.net/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -37,6 +43,13 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>${spigot.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- HuskHomes Bukkit API 软依赖 -->
+        <dependency>
+            <groupId>net.william278.huskhomes</groupId>
+            <artifactId>huskhomes-bukkit</artifactId>
+            <version>${huskhomes.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

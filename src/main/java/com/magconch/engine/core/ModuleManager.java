@@ -104,10 +104,13 @@ public class ModuleManager {
         for (EngineModule module : modules.values()) {
             if (!module.isEnabled()) {
                 try {
-                    module.onEnable();
                     module.setEnabled(true);
-                    plugin.getLogger().info("模块 [" + module.getId() + "] 已成功启用。");
+                    module.onEnable();
+                    if (module.isEnabled()) {
+                        plugin.getLogger().info("模块 [" + module.getId() + "] 已成功启用。");
+                    }
                 } catch (Exception e) {
+                    module.setEnabled(false);
                     plugin.getLogger().log(Level.SEVERE, "启用模块 [" + module.getId() + "] 时发生严重异常: ", e);
                 }
             }
@@ -136,12 +139,10 @@ public class ModuleManager {
      */
     public void reloadAll() {
         for (EngineModule module : modules.values()) {
-            if (module.isEnabled()) {
-                try {
-                    module.onReload();
-                } catch (Exception e) {
-                    plugin.getLogger().log(Level.SEVERE, "重载模块 [" + module.getId() + "] 时发生异常: ", e);
-                }
+            try {
+                module.onReload();
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.SEVERE, "重载模块 [" + module.getId() + "] 时发生异常: ", e);
             }
         }
     }

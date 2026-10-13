@@ -4,6 +4,7 @@ main: com.magconch.engine.MagconchEngine
 api-version: '1.20'
 authors: [ MagconchTeam ]
 description: Minecraft Server Modular Engine Core Plugin
+softdepend: [ HuskHomes ]
 
 commands:
   magconch:
@@ -26,6 +27,7 @@ permissions:
       magconch.command.modules: true
       magconch.use.undo: true
       magconch.flight.use: true
+      magconch.teleportcost.bypass: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -41,3 +43,6 @@ permissions:
   magconch.flight.use:
     description: 允许切换生存饥饿飞行模式
     default: true
+  magconch.teleportcost.bypass:
+    description: 豁免传送距离经验扣费
+    default: op

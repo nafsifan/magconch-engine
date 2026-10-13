@@ -40,6 +40,11 @@ flight:
   exhausted: "{prefix}&#ff4d4f饱食度耗尽，已停止飞行！"
   disabled_module: "{prefix}&#ff4d4f生存飞行功能当前未启用。"
 
+teleport-cost:
+  insufficient: "{prefix}&#ff4d4f传送经验不足！本次需要 &#fadb14{cost} &#ff4d4f点经验，当前仅有 &#fadb14{current} &#ff4d4f点。"
+  warmup_notice: "{prefix}&#d9d9d9本次传送预计消耗 &#fadb14{cost} &#d9d9d9点经验 &#8c8c8c(移动可取消)"
+  deducted: "{prefix}&#52c41a已消耗 &#fadb14{cost} &#52c41a点经验完成传送。"
+
 commands:
   help:
     description: "查看指令帮助"

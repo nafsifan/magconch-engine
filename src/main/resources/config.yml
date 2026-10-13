@@ -29,3 +29,19 @@ modules:
       interval-seconds: 20
       # 每次消耗点数（1 点 = 半个鸡腿，优先扣饱和度）
       cost-per-interval: 1
+
+  # 传送经验消耗模块
+  teleport-cost:
+    enabled: true
+    # 基础起步消耗 (经验点数)
+    base-cost: 5
+    # 距离倍率 (越大越贵，默认 0.8：百格13点 / 千格30点 / 万格85点)
+    distance-rate: 0.8
+    # 单次消耗上限 (经验点数)
+    max-cost: 150
+    # 随机传送 (/rtp) 固定消耗 (经验点数)
+    rtp-cost: 40
+    # 跨维度额外加收 (经验点数)
+    cross-world:
+      nether: 15
+      the-end: 25
