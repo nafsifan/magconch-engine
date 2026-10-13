@@ -3,7 +3,10 @@ package com.magconch.engine.modules.flight.task;
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.modules.flight.FlightModule;
 import com.magconch.engine.modules.flight.config.FlightConfig;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -73,15 +76,21 @@ public class FlightHungerTask extends BukkitRunnable {
 
             if (currentSeconds >= interval) {
                 // 达到扣除周期，执行原版级饱和度优先扣除并向客户端强制推送数据包
-                consumeFood(player, config.getCostPerInterval());
+                float cost = config.getCostPerInterval();
+                consumeFood(player, cost);
                 flightSecondsMap.put(uuid, 0);
 
-                // 扣除后再次复核饱食度，若已触底立即断飞
-                if (player.getFoodLevel() <= minFood) {
+                // 扣除后再次复核饱食度，若已触底立即断飞；若仅够最后 1 次消耗则发出 ActionBar 预警
+                int foodAfter = player.getFoodLevel();
+                if (foodAfter <= minFood) {
                     player.setFlying(false);
                     flightSecondsMap.remove(uuid);
                     FlightModule.enableFlyingFallDamage(player);
                     plugin.getLanguageManager().sendMessage(player, "flight.exhausted");
+                } else if (player.getSaturation() <= 0f && foodAfter <= minFood + Math.max(1, (int) Math.ceil(cost))) {
+                    String warnMsg = plugin.getLanguageManager().getMessage("flight.low_hunger");
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(warnMsg));
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.2f);
                 }
             } else {
                 flightSecondsMap.put(uuid, currentSeconds);

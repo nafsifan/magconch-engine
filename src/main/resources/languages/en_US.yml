@@ -37,6 +37,7 @@ flight:
   enabled: "{prefix}&#52c41aSurvival flight mode enabled."
   disabled: "{prefix}&#ff4d4fSurvival flight mode disabled."
   too_hungry: "{prefix}&#ff4d4fFood level too low to fly."
+  low_hunger: "&#fadb14› &#d9d9d9Food level critically low, eat or land soon"
   exhausted: "{prefix}&#ff4d4fFood level exhausted, flight stopped!"
   disabled_module: "{prefix}&#ff4d4fFlight feature is currently disabled."
 

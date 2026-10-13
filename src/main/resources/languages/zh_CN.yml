@@ -37,6 +37,7 @@ flight:
   enabled: "{prefix}&#52c41a已开启饥饿飞行模式。"
   disabled: "{prefix}&#ff4d4f已关闭饥饿飞行模式。"
   too_hungry: "{prefix}&#ff4d4f当前饱食度过低，无法起飞。"
+  low_hunger: "&#fadb14› &#d9d9d9饱食度即将耗尽，请及时进食或降落"
   exhausted: "{prefix}&#ff4d4f饱食度耗尽，已停止飞行！"
   disabled_module: "{prefix}&#ff4d4f生存飞行功能当前未启用。"
 
