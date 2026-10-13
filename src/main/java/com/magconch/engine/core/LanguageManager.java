@@ -53,11 +53,11 @@ public class LanguageManager {
             langFile = new File(plugin.getDataFolder(), "languages/zh_CN.yml");
         }
 
-        // 自动补齐缺失语言键
+        // 自动同步语言键（补齐新增键与清理废弃键）
         String resourcePath = "languages/" + currentLanguage + ".yml";
-        int addedKeys = ConfigUpdater.update(plugin, resourcePath, langFile);
-        if (addedKeys > 0) {
-            plugin.getLogger().info("语言文件 " + langFile.getName() + " 已自动补齐 " + addedKeys + " 项新语言键。");
+        int changedKeys = ConfigUpdater.update(plugin, resourcePath, langFile);
+        if (changedKeys > 0) {
+            plugin.getLogger().info("语言文件 " + langFile.getName() + " 已自动同步 " + changedKeys + " 项语言键变更。");
         }
 
         // 加载本地磁盘语言配置 (服主自定义优先)

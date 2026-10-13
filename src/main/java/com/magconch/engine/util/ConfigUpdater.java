@@ -11,9 +11,9 @@ import java.util.*;
 import java.util.logging.Level;
 
 /**
- * 配置增量更新工具类
+ * 配置增量同步工具类
  * <p>
- * 对比 Jar 内置模板与磁盘文件，自动将缺失键及其注释插入至对应层级节点。
+ * 对比 Jar 内置模板与磁盘文件，自动将缺失键及其注释插入至对应层级节点，并清理已废弃的冗余配置块。
  */
 public final class ConfigUpdater {
 
@@ -21,12 +21,12 @@ public final class ConfigUpdater {
     }
 
     /**
-     * 对目标配置文件执行结构化增量同步
+     * 对目标配置文件执行结构化双向同步（补齐缺失键 + 剔除废弃键）
      *
      * @param plugin       插件主类
      * @param resourcePath Jar 内置模板相对路径
      * @param targetFile   磁盘实际配置文件
-     * @return 实际补齐的新配置键数量（0 表示完全一致，未写盘）
+     * @return 实际变更的配置节点数量（0 表示完全一致，未写盘）
      */
     public static int update(MagconchEngine plugin, String resourcePath, File targetFile) {
         if (!targetFile.exists()) {
@@ -60,7 +60,7 @@ public final class ConfigUpdater {
             return 0;
         }
 
-        // 3. 提取所有缺失的叶子节点路径
+        // 3. 提取缺失的叶子节点与已废弃的最外层节点路径
         List<String> missingKeys = new ArrayList<>();
         for (String key : jarConfig.getKeys(true)) {
             if (!jarConfig.isConfigurationSection(key) && !diskConfig.contains(key)) {
@@ -68,28 +68,139 @@ public final class ConfigUpdater {
             }
         }
 
-        if (missingKeys.isEmpty()) {
+        List<String> obsoleteKeys = new ArrayList<>();
+        for (String key : diskConfig.getKeys(true)) {
+            if (!jarConfig.contains(key)) {
+                int dotIndex = key.lastIndexOf('.');
+                String parent = dotIndex == -1 ? "" : key.substring(0, dotIndex);
+                if (parent.isEmpty() || jarConfig.contains(parent)) {
+                    obsoleteKeys.add(key);
+                }
+            }
+        }
+
+        if (missingKeys.isEmpty() && obsoleteKeys.isEmpty()) {
             return 0;
         }
 
-        // 4. 解析磁盘文本行与 Jar 模板文本行，执行结构化就近插入
+        // 4. 解析磁盘文本行与 Jar 模板文本行，执行废弃块清理与缺失键就近插入
         try {
             List<String> diskLines = Files.readAllLines(targetFile.toPath(), StandardCharsets.UTF_8);
-            List<String> jarLines;
-            try (InputStream templateIn = plugin.getResource(resourcePath)) {
-                if (templateIn == null) {
-                    return 0;
+            List<String> updatedLines = removeObsoleteKeys(diskLines, obsoleteKeys);
+
+            if (!missingKeys.isEmpty()) {
+                List<String> jarLines;
+                try (InputStream templateIn = plugin.getResource(resourcePath)) {
+                    if (templateIn == null) {
+                        return 0;
+                    }
+                    jarLines = readLines(templateIn);
                 }
-                jarLines = readLines(templateIn);
+                updatedLines = mergeMissingKeys(updatedLines, jarLines, missingKeys);
             }
 
-            List<String> updatedLines = mergeMissingKeys(diskLines, jarLines, missingKeys);
             Files.write(targetFile.toPath(), updatedLines, StandardCharsets.UTF_8);
-            return missingKeys.size();
+            return missingKeys.size() + obsoleteKeys.size();
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "写入增量同步配置到 " + targetFile.getName() + " 失败", e);
             return 0;
         }
+    }
+
+    /**
+     * 从磁盘文本行中移除已废弃的配置节点（含同缩进紧邻注释及其下属子行）
+     */
+    private static List<String> removeObsoleteKeys(List<String> diskLines, List<String> obsoleteKeys) {
+        List<String> result = new ArrayList<>(diskLines);
+
+        for (String obsoleteKey : obsoleteKeys) {
+            int keyLineIndex = findKeyLineIndex(result, obsoleteKey);
+            if (keyLineIndex == -1) {
+                continue;
+            }
+
+            int keyIndent = getIndent(result.get(keyLineIndex));
+
+            // 向上囊括同缩进级别的紧邻注释行
+            int startRemove = keyLineIndex;
+            while (startRemove > 0) {
+                String prevLine = result.get(startRemove - 1);
+                String prevTrimmed = prevLine.trim();
+                if (prevTrimmed.startsWith("#") && getIndent(prevLine) == keyIndent) {
+                    startRemove--;
+                } else {
+                    break;
+                }
+            }
+
+            // 向下囊括所有缩进更深的子行（如列表项或子节点）
+            int endRemove = keyLineIndex + 1;
+            while (endRemove < result.size()) {
+                String line = result.get(endRemove);
+                String trimmed = line.trim();
+                if (trimmed.isEmpty()) {
+                    int nextNonEmpty = endRemove + 1;
+                    while (nextNonEmpty < result.size() && result.get(nextNonEmpty).trim().isEmpty()) {
+                        nextNonEmpty++;
+                    }
+                    if (nextNonEmpty < result.size() && getIndent(result.get(nextNonEmpty)) > keyIndent) {
+                        endRemove = nextNonEmpty;
+                        continue;
+                    }
+                    break;
+                }
+                if (getIndent(line) > keyIndent) {
+                    endRemove++;
+                } else {
+                    break;
+                }
+            }
+
+            result.subList(startRemove, endRemove).clear();
+        }
+
+        return result;
+    }
+
+    /**
+     * 按完整路径与缩进层级精准定位配置键所在行号
+     */
+    private static int findKeyLineIndex(List<String> lines, String keyPath) {
+        String[] parts = keyPath.split("\\.");
+        int currentSearchIndex = 0;
+
+        for (int i = 0; i < parts.length; i++) {
+            int targetIndent = i * 2;
+            String targetHeader = parts[i] + ":";
+            int foundIndex = -1;
+
+            for (int lineIdx = currentSearchIndex; lineIdx < lines.size(); lineIdx++) {
+                String line = lines.get(lineIdx);
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+                    continue;
+                }
+
+                int indent = getIndent(line);
+                if (indent < targetIndent) {
+                    return -1; // 已跳出父级 Section 范围
+                }
+                if (indent == targetIndent && (trimmed.equals(targetHeader) || trimmed.startsWith(targetHeader + " "))) {
+                    foundIndex = lineIdx;
+                    break;
+                }
+            }
+
+            if (foundIndex == -1) {
+                return -1;
+            }
+            if (i == parts.length - 1) {
+                return foundIndex;
+            }
+            currentSearchIndex = foundIndex + 1;
+        }
+
+        return -1;
     }
 
     /**
