@@ -133,35 +133,52 @@ public class ShowItemCommand implements SubCommand, CommandExecutor, TabComplete
      *                                     ↑ 悬浮显示完整物品提示框
      */
     private Component buildShowMessage(Player player, ItemStack item) {
-        // 语言包文本模板
+        // 语言包文本模板（拆分为 前缀 | 玩家名 | 中间 | 物品 | 后缀）
         String template = plugin.getLanguageManager().getMessage("show-item.broadcast",
-                "{player}", player.getDisplayName(),
+                "{player}", "__PLAYER_PLACEHOLDER__",
                 "{item}", "__ITEM_PLACEHOLDER__",
                 "{amount}", String.valueOf(item.getAmount()));
 
-        // 按占位符拆分
-        String[] parts = template.split("__ITEM_PLACEHOLDER__", 2);
+        // 拆分模板
+        String[] parts = template.split("__PLAYER_PLACEHOLDER__", 2);
+        String beforePlayer = parts[0];
+        String afterPlayer = parts.length > 1 ? parts[1] : "";
+        
+        String[] parts2 = afterPlayer.split("__ITEM_PLACEHOLDER__", 2);
+        String betweenPlayerAndItem = parts2[0];
+        String afterItem = parts2.length > 1 ? parts2[1] : "";
 
-        // 前半段文本（玩家名等）
-        Component before = deserializeLegacy(parts[0]);
-
-        // 物品组件（带悬浮提示）
-        Component itemComponent = Component.text("[")
-                .color(net.kyori.adventure.text.format.NamedTextColor.AQUA)
-                .append(Component.translatable(item.translationKey()))
-                .append(Component.text("]"))
-                .hoverEvent(item.asHoverEvent());
-
-        // 后半段文本
-        Component after = parts.length > 1 ? deserializeLegacy(parts[1]) : Component.empty();
-
-        return before.append(itemComponent).append(after);
+        // 构建组件
+        return deserializeLegacy(beforePlayer)                    // MAGCONCH 前缀（保留颜色）
+                .append(player.displayName())                     // 玩家名（保留其 DisplayName 颜色）
+                .append(deserializeLegacy(betweenPlayerAndItem))  // 中间文本
+                .append(getItemDisplayComponent(item))            // 物品名（带悬浮）
+                .append(deserializeLegacy(afterItem));            // 后缀文本
     }
 
     /**
-     * 将带 & 和 &#RRGGBB 的旧版颜色代码转换为 Adventure Component
+     * 构建物品展示组件（优先显示自定义名称，带悬浮提示）
+     */
+    private Component getItemDisplayComponent(ItemStack item) {
+        Component itemName;
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            itemName = item.getItemMeta().displayName();  // 自定义名称（保留颜色）
+        } else {
+            itemName = Component.translatable(item.translationKey());  // 原版翻译名
+        }
+
+        return Component.text("[")
+                .color(net.kyori.adventure.text.format.NamedTextColor.AQUA)
+                .append(itemName)
+                .append(Component.text("]"))
+                .hoverEvent(item.asHoverEvent());
+    }
+
+    /**
+     * 将带 § 的旧版颜色代码转换为 Adventure Component
+     * LanguageManager 已经将 & 和 &#RRGGBB 转换为 § 代码
      */
     private Component deserializeLegacy(String text) {
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(text);
+        return LegacyComponentSerializer.legacySection().deserialize(text);
     }
 }
