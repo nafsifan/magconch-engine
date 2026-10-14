@@ -11,9 +11,10 @@
 ## 2. Minecraft 插件专项工程准则 (Minecraft Engineering Principles)
 
 ### 2.1 兼容性与服务端标准
-- **【跨端最大公约数】**：
-  - 以标准的 `spigot-api` 作为核心依赖底座，**保证在 Spigot、Paper、Purpur（含 26.x 现代版本）上 100% 通用无报错**。
-  - 严禁引入仅在特定服务端存在的专有类库（如未经降级防护的 Paper 独占类），避免在纯 Spigot 上触发 `NoClassDefFoundError`。
+- **【Paper API 优先】**：
+  - 以 **Paper API 1.21.4+** 作为核心依赖底座，**保证在 Paper、Purpur（含 26.x 现代版本）上 100% 通用无报错**。
+  - 优先使用 Paper 提供的 Adventure API（`net.kyori.adventure.*`）处理文本组件与交互，避免使用过时的 BungeeCord Chat API。
+  - Paper API 是 Spigot API 的超集，向后兼容标准 Bukkit/Spigot API，但**不保证在纯 Spigot 服务端上运行**（1.20.5+ 后 Paper 引入的 Data Components 等特性在纯 Spigot 上不可用）。
 - **【运行时与编译目标】**：统一基于 **Java 21** 编译目标，严格适配现代 JVM 运行环境。
 - **【物品组件保真 (Data Components)】**：
   - 自 1.20.5 及后续 26.x 版本起，物品数据已彻底改版为 Data Components。

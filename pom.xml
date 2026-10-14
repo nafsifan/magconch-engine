@@ -15,15 +15,15 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spigot.version>1.20.4-R0.1-SNAPSHOT</spigot.version>
+        <paper.version>1.21.4-R0.1-SNAPSHOT</paper.version>
         <huskhomes.version>4.9.9</huskhomes.version>
     </properties>
 
     <repositories>
-        <!-- Spigot 官方镜像源 -->
+        <!-- Paper 官方镜像源 -->
         <repository>
-            <id>spigotmc-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <!-- Sonatype 镜像源 -->
         <repository>
@@ -38,11 +38,11 @@
     </repositories>
 
     <dependencies>
-        <!-- Spigot API 标准通用依赖 -->
+        <!-- Paper API (包含 Adventure 与 Spigot API) -->
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>${spigot.version}</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
             <scope>provided</scope>
         </dependency>
         <!-- HuskHomes Bukkit API 软依赖 -->

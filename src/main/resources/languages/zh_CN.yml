@@ -51,6 +51,11 @@ trash:
   opened: "{prefix}&#d9d9d9已打开垃圾桶，放入物品并关闭窗口即可销毁。"
   disabled_module: "{prefix}&#ff4d4f垃圾桶功能当前未启用。"
 
+show-item:
+  broadcast: "{prefix}&#f0f0f0{player} &#d9d9d9向大家展示了 {item} &#8c8c8cx{amount}"
+  empty_hand: "{prefix}&#ff4d4f手中没有物品可以展示。"
+  disabled_module: "{prefix}&#ff4d4f物品展示功能当前未启用。"
+
 commands:
   help:
     description: "查看指令帮助"
@@ -64,3 +69,5 @@ commands:
     description: "切换生存飞行模式"
   trash:
     description: "打开垃圾桶界面"
+  showitem:
+    description: "展示手中物品"

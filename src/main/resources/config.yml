@@ -50,3 +50,7 @@ modules:
   trash:
     enabled: true
 
+  # 物品展示模块
+  show-item:
+    enabled: true
+

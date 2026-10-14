@@ -51,6 +51,11 @@ trash:
   opened: "{prefix}&#d9d9d9Trash can opened. Items will be discarded upon closing."
   disabled_module: "{prefix}&#ff4d4fTrash feature is currently disabled."
 
+show-item:
+  broadcast: "{prefix}&#f0f0f0{player} &#d9d9d9is showing {item} &#8c8c8cx{amount}"
+  empty_hand: "{prefix}&#ff4d4fYou are not holding any item."
+  disabled_module: "{prefix}&#ff4d4fShow item feature is currently disabled."
+
 commands:
   help:
     description: "View available commands"
@@ -64,3 +69,5 @@ commands:
     description: "Toggle survival flight mode"
   trash:
     description: "Open disposal trash can"
+  showitem:
+    description: "Show held item to everyone"
