@@ -1,7 +1,6 @@
 package com.magconch.engine.modules.trash.listener;
 
 import com.magconch.engine.modules.trash.TrashHolder;
-import com.magconch.engine.modules.trash.config.TrashConfig;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,18 +16,8 @@ import org.bukkit.inventory.ItemStack;
  */
 public class TrashListener implements Listener {
 
-    private final TrashConfig config;
-
-    public TrashListener(TrashConfig config) {
-        this.config = config;
-    }
-
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (!config.isSoundEnabled()) {
-            return;
-        }
-
         Inventory inventory = event.getInventory();
         if (inventory.getHolder() instanceof TrashHolder) {
             // 检查容器内是否存在有效物品被销毁

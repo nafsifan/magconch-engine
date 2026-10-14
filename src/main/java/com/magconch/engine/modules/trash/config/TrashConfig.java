@@ -7,9 +7,9 @@ import org.bukkit.configuration.file.FileConfiguration;
  */
 public class TrashConfig {
 
+    public static final int INVENTORY_SIZE = 36;
+
     private boolean enabled = true;
-    private int rows = 4;
-    private boolean soundEnabled = true;
 
     /**
      * 从核心配置文件中加载垃圾桶模块相关参数
@@ -18,23 +18,13 @@ public class TrashConfig {
      */
     public void load(FileConfiguration config) {
         this.enabled = config.getBoolean("modules.trash.enabled", true);
-        this.rows = Math.max(1, Math.min(6, config.getInt("modules.trash.rows", 4)));
-        this.soundEnabled = config.getBoolean("modules.trash.sound-enabled", true);
     }
 
     public boolean isEnabled() {
         return enabled;
     }
 
-    public int getRows() {
-        return rows;
-    }
-
     public int getSize() {
-        return rows * 9;
-    }
-
-    public boolean isSoundEnabled() {
-        return soundEnabled;
+        return INVENTORY_SIZE;
     }
 }

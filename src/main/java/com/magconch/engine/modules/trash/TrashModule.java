@@ -60,12 +60,11 @@ public class TrashModule implements EngineModule {
 
         // 3. 注册事件监听器
         if (listener == null) {
-            listener = new TrashListener(config);
+            listener = new TrashListener();
             plugin.getServer().getPluginManager().registerEvents(listener, plugin);
         }
 
         this.enabled = config.isEnabled();
-        plugin.getLogger().info("垃圾桶模块 (trash) 已启用 (容量: " + config.getSize() + " 格)。");
     }
 
     @Override
@@ -77,7 +76,6 @@ public class TrashModule implements EngineModule {
         }
 
         this.enabled = false;
-        plugin.getLogger().info("垃圾桶模块 (trash) 已安全停用。");
     }
 
     @Override

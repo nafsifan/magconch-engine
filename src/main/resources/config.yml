@@ -49,8 +49,4 @@ modules:
   # 虚拟垃圾桶模块
   trash:
     enabled: true
-    # 容器行数 (1-6，4 行即 36 格，6 行即 54 格)
-    rows: 4
-    # 销毁物品时是否播放岩浆熄灭音效
-    sound-enabled: true
 
