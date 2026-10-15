@@ -4,6 +4,7 @@ import com.magconch.engine.command.MainCommand;
 import com.magconch.engine.core.ConfigManager;
 import com.magconch.engine.core.LanguageManager;
 import com.magconch.engine.core.ModuleManager;
+import com.magconch.engine.modules.creaturebundle.CreatureBundleModule;
 import com.magconch.engine.modules.flight.FlightModule;
 import com.magconch.engine.modules.teleportcost.TeleportCostModule;
 import com.magconch.engine.modules.showitem.ShowItemModule;
@@ -76,6 +77,7 @@ public class MagconchEngine extends JavaPlugin {
             this.moduleManager.registerModule(new TeleportCostModule(this));
             this.moduleManager.registerModule(new TrashModule(this));
             this.moduleManager.registerModule(new ShowItemModule(this));
+            this.moduleManager.registerModule(new CreatureBundleModule(this));
 
             // 6. 统一调度启用所有挂载模块
             this.moduleManager.enableAll();

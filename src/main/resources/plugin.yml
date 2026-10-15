@@ -1,15 +1,16 @@
+# yaml-language-server: $schema=none
 name: MagconchEngine
 version: '${project.version}'
 main: com.magconch.engine.MagconchEngine
 api-version: '1.20'
-authors: [ MagconchTeam ]
+authors: [MagconchTeam]
 description: Minecraft Server Modular Engine Core Plugin
-softdepend: [ HuskHomes ]
+softdepend: [HuskHomes]
 
 commands:
   magconch:
     description: Magconch Engine 核心管理命令
-    aliases: [ magc ]
+    aliases: [magc]
     permission: magconch.command.use
     usage: /<command> [subcommand]
   fly:
@@ -18,12 +19,12 @@ commands:
     usage: /<command>
   trash:
     description: 打开垃圾桶界面销毁物品
-    aliases: [ ljt ]
+    aliases: [ljt]
     permission: magconch.trash.use
     usage: /<command>
   showitem:
     description: 向全服展示手中物品
-    aliases: [ show ]
+    aliases: [show]
     permission: magconch.showitem.use
     usage: /<command>
 
@@ -41,6 +42,9 @@ permissions:
       magconch.showitem.use: true
       magconch.showitem.bypass: true
       magconch.teleportcost.bypass: true
+      magconch.use.bundle: true
+      magconch.command.bundle: true
+      magconch.bypass.bundle: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -67,4 +71,13 @@ permissions:
     default: op
   magconch.teleportcost.bypass:
     description: 豁免传送距离经验扣费
+    default: op
+  magconch.use.bundle:
+    description: 允许使用生灵收纳袋收纳与释放生物
+    default: true
+  magconch.command.bundle:
+    description: 允许使用生灵收纳袋管理指令
+    default: op
+  magconch.bypass.bundle:
+    description: 豁免生灵袋宠物主人限制与管理特权
     default: op

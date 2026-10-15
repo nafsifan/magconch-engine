@@ -6,7 +6,9 @@ prefix: "&#4096ff&lMAGCONCH &#8c8c8c› &#d9d9d9"
 
 general:
   no_permission: "{prefix}&#ff4d4f暂无执行权限。"
-  unknown_command: "{prefix}&#ff4d4f未找到该指令，请输入 &#f0f0f0/magc help &#ff4d4f查看可用指令。"
+  unknown_command: >-
+    {prefix}&#ff4d4f未找到该指令，请输入 &#f0f0f0/magc help
+    &#ff4d4f查看可用指令。
   player_only: "{prefix}&#ff4d4f该指令只能在游戏内使用。"
   console_only: "{prefix}&#ff4d4f该指令只能在控制台执行。"
 
@@ -16,7 +18,9 @@ reload:
   failure: "{prefix}&#ff4d4f重新加载失败，请查看后台报错日志。"
 
 modules:
-  header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0功能模块清单 &#8c8c8c(&#597ef7{count}&#8c8c8c)"
+  header: >-
+    &#4096ff&lMAGCONCH &#8c8c8c›
+    &#f0f0f0功能模块清单 &#8c8c8c(&#597ef7{count}&#8c8c8c)
   item_format: "  &#8c8c8c› &#f0f0f0{id} &#8c8c8c· {status}"
   status_enabled: "&#52c41a● 运行中"
   status_disabled: "&#8c8c8c○ 已停用"
@@ -24,7 +28,8 @@ modules:
 
 help:
   header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0可用指令手册"
-  item_format: "  &#8c8c8c/&#f0f0f0{command} &#4096ff{subcommand} &#8c8c8c— &#d9d9d9{description}"
+  item_format: "  &#8c8c8c/&#f0f0f0{command} &#4096ff{subcommand}\
+    \ &#8c8c8c— &#d9d9d9{description}"
   footer: ""
 
 undo:
@@ -42,8 +47,12 @@ flight:
   disabled_module: "{prefix}&#ff4d4f生存飞行功能当前未启用。"
 
 teleport-cost:
-  insufficient: "{prefix}&#ff4d4f传送经验不足！本次需要 &#fadb14{cost} &#ff4d4f点经验，当前仅有 &#fadb14{current} &#ff4d4f点。"
-  warmup_notice: "{prefix}&#d9d9d9本次传送预计消耗 &#fadb14{cost} &#d9d9d9点经验 &#8c8c8c(移动可取消)"
+  insufficient: >-
+    {prefix}&#ff4d4f传送经验不足！本次需要 &#fadb14{cost}
+    &#ff4d4f点经验，当前仅有 &#fadb14{current} &#ff4d4f点。
+  warmup_notice: >-
+    {prefix}&#d9d9d9本次传送预计消耗 &#fadb14{cost}
+    &#d9d9d9点经验 &#8c8c8c(移动可取消)
   deducted: "{prefix}&#52c41a已消耗 &#fadb14{cost} &#52c41a点经验完成传送。"
 
 trash:
@@ -72,3 +81,43 @@ commands:
     description: "打开垃圾桶界面"
   showitem:
     description: "展示手中物品"
+  bundle:
+    description: "给予玩家生灵收纳袋"
+
+creature-bundle:
+  item:
+    empty_name: "&#4096ff&l生灵收纳袋"
+    empty_lore:
+      - "&#8c8c8c空间折叠制成的魔法皮袋"
+      - ""
+      - "&#52c41a› &#d9d9d9使用方式: &#fadb14潜行 + 右键生物"
+      - "&#8c8c8c  可将友好或中立生物安全收入袋中"
+    filled_name: "&#52c41a&l封存的生灵袋 &#8c8c8c({entity_name})"
+    filled_lore:
+      - "&#8c8c8c内部容纳着一只鲜活的生命"
+      - ""
+      - "&#4096ff› &#d9d9d9收纳生物: &#f0f0f0{entity_name}"
+      - "&#ff4d4f› &#d9d9d9生命状态: &#ff7875❤ {health}&#8c8c8c/{max_health}"
+      - "&#faad14› &#d9d9d9详细特征: &#d9d9d9{extra_info}"
+      - ""
+      - "&#52c41a› &#d9d9d9释放方式: &#fadb14右键安全方块表面"
+  captured: "{prefix}&#52c41a已成功将 &#fadb14{entity} &#52c41a收入生灵袋中！"
+  released: "{prefix}&#52c41a已安全释放 &#fadb14{entity} &#52c41a！"
+  no_permission: "{prefix}&#ff4d4f你没有使用生灵收纳袋的权限。"
+  invalid_entity: "{prefix}&#ff4d4f该目标无法被收纳！"
+  wandering_trader_denied: "{prefix}&#ff4d4f流浪商人生性漂泊，无法被收纳。"
+  dead_entity: "{prefix}&#ff4d4f该生物已濒临死亡或处于异常状态，无法收纳。"
+  riding_entity: "{prefix}&#ff4d4f该生物正处于骑乘或搭载状态，无法收纳！"
+  type_not_allowed: "{prefix}&#ff4d4f当前生物种类不受生灵收纳袋支持。"
+  villager_disabled: "{prefix}&#ff4d4f服务器已禁止收纳村民。"
+  not_owner: "{prefix}&#ff4d4f这只宠物不属于你，无法收纳！"
+  dangerous_location: "{prefix}&#ff4d4f目标位置极其危险或空间受限，无法释放！"
+  no_space: "{prefix}&#ff4d4f目标方块空间不足，无法安全释放生物！"
+  corrupted_data: "{prefix}&#ff4d4f该生灵袋数据已损坏或无法解析！"
+  command_usage: "{prefix}&#ff4d4f用法: &#f0f0f0/mcore bundle give <玩家> [数量]"
+  player_not_found: "{prefix}&#ff4d4f未找到在线玩家 &#f0f0f0{player}&#ff4d4f。"
+  invalid_amount: "{prefix}&#ff4d4f数量必须是有效的正整数 (1-64)。"
+  given_success: >-
+    {prefix}&#52c41a已给予玩家 &#f0f0f0{player}
+    &#fadb14{amount} &#52c41a个空白生灵收纳袋。
+  received_notice: "{prefix}&#52c41a你收到了 &#fadb14{amount} &#52c41a个空白生灵收纳袋。"

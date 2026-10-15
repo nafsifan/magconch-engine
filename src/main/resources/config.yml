@@ -56,3 +56,10 @@ modules:
     # 展示指令冷却时间（秒，0 为无冷却）
     cooldown: 3
 
+  # 生灵收纳袋模块
+  creature-bundle:
+    enabled: true
+    # 是否启用工作台合成配方 (8 末影珍珠 + 1 收纳袋)
+    enable-recipe: true
+    # 额外禁止收纳的生物类型 (可选，如需禁用村民则填入 [VILLAGER, ZOMBIE_VILLAGER])
+    disabled-entities: []

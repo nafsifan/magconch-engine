@@ -6,17 +6,23 @@ prefix: "&#4096ff&lMAGCONCH &#8c8c8c› &#d9d9d9"
 
 general:
   no_permission: "{prefix}&#ff4d4fNo permission to execute this action."
-  unknown_command: "{prefix}&#ff4d4fCommand not found. Use &#f0f0f0/magc help &#ff4d4ffor help."
+  unknown_command: >-
+    {prefix}&#ff4d4fCommand not found.
+    Use &#f0f0f0/magc help &#ff4d4ffor help.
   player_only: "{prefix}&#ff4d4fThis command can only be used in-game."
   console_only: "{prefix}&#ff4d4fThis command can only be used from console."
 
 reload:
   start: "{prefix}&#d9d9d9Reloading configurations and modules..."
-  success: "{prefix}&#52c41aReloaded successfully &#8c8c8c(&#597ef7{time}ms&#8c8c8c)"
+  success: >-
+    {prefix}&#52c41aReloaded successfully
+    &#8c8c8c(&#597ef7{time}ms&#8c8c8c)
   failure: "{prefix}&#ff4d4fReload failed, please check server console."
 
 modules:
-  header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0Modules &#8c8c8c(&#597ef7{count}&#8c8c8c)"
+  header: >-
+    &#4096ff&lMAGCONCH &#8c8c8c›
+    &#f0f0f0Modules &#8c8c8c(&#597ef7{count}&#8c8c8c)
   item_format: "  &#8c8c8c› &#f0f0f0{id} &#8c8c8c· {status}"
   status_enabled: "&#52c41a● RUNNING"
   status_disabled: "&#8c8c8c○ STOPPED"
@@ -24,7 +30,8 @@ modules:
 
 help:
   header: "&#4096ff&lMAGCONCH &#8c8c8c› &#f0f0f0Commands"
-  item_format: "  &#8c8c8c/&#f0f0f0{command} &#4096ff{subcommand} &#8c8c8c— &#d9d9d9{description}"
+  item_format: "  &#8c8c8c/&#f0f0f0{command} &#4096ff{subcommand}\
+    \ &#8c8c8c— &#d9d9d9{description}"
   footer: ""
 
 undo:
@@ -42,20 +49,32 @@ flight:
   disabled_module: "{prefix}&#ff4d4fFlight feature is currently disabled."
 
 teleport-cost:
-  insufficient: "{prefix}&#ff4d4fInsufficient experience! Requires &#fadb14{cost} &#ff4d4fexp, you only have &#fadb14{current} &#ff4d4fexp."
-  warmup_notice: "{prefix}&#d9d9d9Estimated teleport cost: &#fadb14{cost} &#d9d9d9exp &#8c8c8c(move to cancel)"
-  deducted: "{prefix}&#52c41aConsumed &#fadb14{cost} &#52c41aexp to complete teleportation."
+  insufficient: >-
+    {prefix}&#ff4d4fInsufficient experience! Requires
+    &#fadb14{cost} &#ff4d4fexp, you only have &#fadb14{current} &#ff4d4fexp.
+  warmup_notice: >-
+    {prefix}&#d9d9d9Estimated teleport cost:
+    &#fadb14{cost} &#d9d9d9exp &#8c8c8c(move to cancel)
+  deducted: >-
+    {prefix}&#52c41aConsumed &#fadb14{cost}
+    &#52c41aexp to complete teleportation.
 
 trash:
   title: "&#fa541c&lTrash Can &#8c8c8c(Close to discard)"
-  opened: "{prefix}&#d9d9d9Trash can opened. Items will be discarded upon closing."
+  opened: >-
+    {prefix}&#d9d9d9Trash can opened.
+    Items will be discarded upon closing.
   disabled_module: "{prefix}&#ff4d4fTrash feature is currently disabled."
 
 show-item:
-  broadcast: "{prefix}&#f0f0f0{player} &#d9d9d9is showing {item} &#8c8c8cx{amount}"
+  broadcast: >-
+    {prefix}&#f0f0f0{player} &#d9d9d9is
+    showing {item} &#8c8c8cx{amount}
   empty_hand: "{prefix}&#ff4d4fYou are not holding any item."
   disabled_module: "{prefix}&#ff4d4fShow item feature is currently disabled."
-  cooldown: "{prefix}&#ff4d4fPlease wait &#fadb14{seconds}s &#ff4d4fbefore showing an item again."
+  cooldown: >-
+    {prefix}&#ff4d4fPlease wait &#fadb14{seconds}s
+    &#ff4d4fbefore showing an item again.
 
 commands:
   help:
@@ -72,3 +91,54 @@ commands:
     description: "Open disposal trash can"
   showitem:
     description: "Show held item to everyone"
+  bundle:
+    description: "Give creature bundle to player"
+
+creature-bundle:
+  item:
+    empty_name: "&#4096ff&lCreature Bundle"
+    empty_lore:
+      - "&#8c8c8cMagic pouch woven with space folding"
+      - ""
+      - "&#52c41a› &#d9d9d9Usage: &#fadb14Sneak + Right-Click mob"
+      - "&#8c8c8c  Packs peaceful or neutral mob safely"
+    filled_name: "&#52c41a&lCaptured Creature Bundle &#8c8c8c({entity_name})"
+    filled_lore:
+      - "&#8c8c8cContains a living entity inside"
+      - ""
+      - "&#4096ff› &#d9d9d9Captured: &#f0f0f0{entity_name}"
+      - "&#ff4d4f› &#d9d9d9Health: &#ff7875❤ {health}&#8c8c8c/{max_health}"
+      - "&#faad14› &#d9d9d9Details: &#d9d9d9{extra_info}"
+      - ""
+      - "&#52c41a› &#d9d9d9Release: &#fadb14Right-Click safe block"
+  captured: >-
+    {prefix}&#52c41aCaptured &#fadb14{entity}
+    &#52c41ainto creature bundle!
+  released: >-
+    {prefix}&#52c41aReleased &#fadb14{entity}
+    &#52c41asafely!
+  no_permission: "{prefix}&#ff4d4fYou lack permission to use creature bundle."
+  invalid_entity: "{prefix}&#ff4d4fThis target cannot be captured!"
+  wandering_trader_denied: >-
+    {prefix}&#ff4d4fWandering trader cannot be captured.
+  dead_entity: >-
+    {prefix}&#ff4d4fEntity is dying or invalid,
+    cannot capture.
+  riding_entity: "{prefix}&#ff4d4fEntity is riding or being ridden!"
+  type_not_allowed: "{prefix}&#ff4d4fThis creature type is not supported."
+  villager_disabled: "{prefix}&#ff4d4fCapturing villagers is disabled."
+  not_owner: "{prefix}&#ff4d4fYou are not the owner of this tamed pet!"
+  dangerous_location: "{prefix}&#ff4d4fTarget location is too dangerous!"
+  no_space: "{prefix}&#ff4d4fNot enough space to release creature safely!"
+  corrupted_data: "{prefix}&#ff4d4fCreature bundle data is corrupted!"
+  command_usage: >-
+    {prefix}&#ff4d4fUsage:
+    &#f0f0f0/mcore bundle give <player> [amt]
+  player_not_found: "{prefix}&#ff4d4fPlayer &#f0f0f0{player} &#ff4d4fnot found."
+  invalid_amount: "{prefix}&#ff4d4fAmount must be positive integer (1-64)."
+  given_success: >-
+    {prefix}&#52c41aGiven &#f0f0f0{player}
+    &#fadb14{amount} &#52c41acreature bundle(s).
+  received_notice: >-
+    {prefix}&#52c41aYou received &#fadb14{amount}
+    &#52c41acreature bundle(s).
