@@ -53,4 +53,6 @@ modules:
   # 物品展示模块
   show-item:
     enabled: true
+    # 展示指令冷却时间（秒，0 为无冷却）
+    cooldown: 3
 

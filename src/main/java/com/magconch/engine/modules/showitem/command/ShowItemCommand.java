@@ -5,10 +5,10 @@ import com.magconch.engine.command.SubCommand;
 import com.magconch.engine.modules.showitem.ShowItemModule;
 import com.magconch.engine.modules.showitem.config.ShowItemConfig;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,6 +18,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 物品展示指令处理器
@@ -28,12 +32,15 @@ import java.util.List;
 public class ShowItemCommand implements SubCommand, CommandExecutor, TabCompleter {
 
     // ==========================================
-    // 依赖
+    // 依赖与状态
     // ==========================================
 
     private final MagconchEngine plugin;
     private final ShowItemModule module;
     private final ShowItemConfig config;
+
+    /** 玩家展示冷却时间戳记录 (UUID -> 上次展示毫秒时间戳) */
+    private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
 
     public ShowItemCommand(MagconchEngine plugin, ShowItemModule module, ShowItemConfig config) {
         this.plugin = plugin;
@@ -110,17 +117,39 @@ public class ShowItemCommand implements SubCommand, CommandExecutor, TabComplete
             return true;
         }
 
-        // 3. 手持物品检查
+        // 3. 冷却时间校验 (OP 或持有 bypass 权限可豁免)
+        int cooldownSeconds = config.getCooldown();
+        if (cooldownSeconds > 0 && !player.hasPermission("magconch.showitem.bypass")) {
+            long now = System.currentTimeMillis();
+            long lastShow = cooldowns.getOrDefault(player.getUniqueId(), 0L);
+            long cooldownMillis = cooldownSeconds * 1000L;
+            if (now - lastShow < cooldownMillis) {
+                double remaining = (cooldownMillis - (now - lastShow)) / 1000.0;
+                plugin.getLanguageManager().sendMessage(player, "show-item.cooldown",
+                        "{seconds}", String.format(Locale.ROOT, "%.1f", remaining));
+                return true;
+            }
+        }
+
+        // 4. 手持物品检查
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType() == Material.AIR) {
             plugin.getLanguageManager().sendMessage(player, "show-item.empty_hand");
             return true;
         }
 
-        // 4. 构建广播消息并发送
+        // 5. 记录冷却时间戳
+        if (cooldownSeconds > 0) {
+            cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+        }
+
+        // 6. 构建广播消息并使用 Bukkit 全服广播
         Component message = buildShowMessage(player, item);
+        Bukkit.broadcast(message);
+
+        // 7. 为全服在线玩家播放清脆提示音
         for (Player online : Bukkit.getOnlinePlayers()) {
-            online.sendMessage(message);
+            online.playSound(online.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1.5f);
         }
 
         return true;
@@ -129,31 +158,20 @@ public class ShowItemCommand implements SubCommand, CommandExecutor, TabComplete
     /**
      * 构建广播用的 Adventure Component 消息
      * <p>
-     * 格式: MAGCONCH › 玩家名 向大家展示了 [物品名 x数量]
-     *                                     ↑ 悬浮显示完整物品提示框
+     * 基于 Component.replaceText 动态插值，天然适应任意语序模板与多语言排版。
      */
     private Component buildShowMessage(Player player, ItemStack item) {
-        // 语言包文本模板（拆分为 前缀 | 玩家名 | 中间 | 物品 | 后缀）
-        String template = plugin.getLanguageManager().getMessage("show-item.broadcast",
-                "{player}", "__PLAYER_PLACEHOLDER__",
-                "{item}", "__ITEM_PLACEHOLDER__",
+        // 先格式化包含前缀、基础色彩与数量的模板
+        String renderedTemplate = plugin.getLanguageManager().getMessage("show-item.broadcast",
                 "{amount}", String.valueOf(item.getAmount()));
 
-        // 拆分模板
-        String[] parts = template.split("__PLAYER_PLACEHOLDER__", 2);
-        String beforePlayer = parts[0];
-        String afterPlayer = parts.length > 1 ? parts[1] : "";
-        
-        String[] parts2 = afterPlayer.split("__ITEM_PLACEHOLDER__", 2);
-        String betweenPlayerAndItem = parts2[0];
-        String afterItem = parts2.length > 1 ? parts2[1] : "";
+        // 反序列化为初始组件树
+        Component baseComponent = LegacyComponentSerializer.legacySection().deserialize(renderedTemplate);
 
-        // 构建组件
-        return deserializeLegacy(beforePlayer)                    // MAGCONCH 前缀（保留颜色）
-                .append(player.displayName())                     // 玩家名（保留其 DisplayName 颜色）
-                .append(deserializeLegacy(betweenPlayerAndItem))  // 中间文本
-                .append(getItemDisplayComponent(item))            // 物品名（带悬浮）
-                .append(deserializeLegacy(afterItem));            // 后缀文本
+        // 使用 replaceText 安全插值玩家名与带 HoverEvent 的物品组件
+        return baseComponent
+                .replaceText(b -> b.matchLiteral("{player}").replacement(player.displayName()))
+                .replaceText(b -> b.matchLiteral("{item}").replacement(getItemDisplayComponent(item)));
     }
 
     /**
@@ -172,13 +190,5 @@ public class ShowItemCommand implements SubCommand, CommandExecutor, TabComplete
                 .append(itemName)
                 .append(Component.text("]"))
                 .hoverEvent(item.asHoverEvent());
-    }
-
-    /**
-     * 将带 § 的旧版颜色代码转换为 Adventure Component
-     * LanguageManager 已经将 & 和 &#RRGGBB 转换为 § 代码
-     */
-    private Component deserializeLegacy(String text) {
-        return LegacyComponentSerializer.legacySection().deserialize(text);
     }
 }

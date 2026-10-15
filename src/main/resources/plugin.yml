@@ -39,6 +39,7 @@ permissions:
       magconch.flight.use: true
       magconch.trash.use: true
       magconch.showitem.use: true
+      magconch.showitem.bypass: true
       magconch.teleportcost.bypass: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
@@ -61,6 +62,9 @@ permissions:
   magconch.showitem.use:
     description: 允许使用物品展示功能
     default: true
+  magconch.showitem.bypass:
+    description: 豁免物品展示冷却时间
+    default: op
   magconch.teleportcost.bypass:
     description: 豁免传送距离经验扣费
     default: op

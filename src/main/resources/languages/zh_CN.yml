@@ -55,6 +55,7 @@ show-item:
   broadcast: "{prefix}&#f0f0f0{player} &#d9d9d9向大家展示了 {item} &#8c8c8cx{amount}"
   empty_hand: "{prefix}&#ff4d4f手中没有物品可以展示。"
   disabled_module: "{prefix}&#ff4d4f物品展示功能当前未启用。"
+  cooldown: "{prefix}&#ff4d4f展示过于频繁，请等待 &#fadb14{seconds} &#ff4d4f秒。"
 
 commands:
   help:

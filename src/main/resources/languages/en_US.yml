@@ -55,6 +55,7 @@ show-item:
   broadcast: "{prefix}&#f0f0f0{player} &#d9d9d9is showing {item} &#8c8c8cx{amount}"
   empty_hand: "{prefix}&#ff4d4fYou are not holding any item."
   disabled_module: "{prefix}&#ff4d4fShow item feature is currently disabled."
+  cooldown: "{prefix}&#ff4d4fPlease wait &#fadb14{seconds}s &#ff4d4fbefore showing an item again."
 
 commands:
   help:
