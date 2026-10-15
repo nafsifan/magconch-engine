@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 生灵收纳袋管理子命令 (/mcore bundle)
+ * 生物捕捉管理子命令 (/mcore bundle)
  * <p>
- * 提供向指定玩家给予空白生灵收纳袋的功能。
+ * 提供向指定玩家给予捕捉喷溅药水的功能。
  */
 public class BundleSubCommand implements SubCommand {
 
@@ -60,7 +60,7 @@ public class BundleSubCommand implements SubCommand {
         String targetName = args[1];
         Player targetPlayer = Bukkit.getPlayerExact(targetName);
         if (targetPlayer == null || !targetPlayer.isOnline()) {
-            plugin.getLanguageManager().sendMessage(sender, "creature-bundle.player_not_found", Map.of("player", targetName));
+            plugin.getLanguageManager().sendMessage(sender, "creature-bundle.player_not_found", "{player}", targetName);
             return true;
         }
 
@@ -74,25 +74,25 @@ public class BundleSubCommand implements SubCommand {
             }
         }
 
-        // 生成空白生灵袋
-        ItemStack bundleItem = BundleItemUtil.createEmptyBundle(plugin, config.getCustomModelData());
-        bundleItem.setAmount(amount);
+        // 生成捕捉喷溅药水
+        ItemStack potionItem = BundleItemUtil.createCapturePotion(plugin, config.getCustomModelData());
+        potionItem.setAmount(amount);
 
         // 安全放入背包或掉落
-        Map<Integer, ItemStack> leftover = targetPlayer.getInventory().addItem(bundleItem);
+        Map<Integer, ItemStack> leftover = targetPlayer.getInventory().addItem(potionItem);
         if (!leftover.isEmpty()) {
             for (ItemStack drop : leftover.values()) {
                 targetPlayer.getWorld().dropItemNaturally(targetPlayer.getLocation(), drop);
             }
         }
 
-        plugin.getLanguageManager().sendMessage(sender, "creature-bundle.given_success", Map.of(
-                "player", targetPlayer.getName(),
-                "amount", String.valueOf(amount)
-        ));
-        plugin.getLanguageManager().sendMessage(targetPlayer, "creature-bundle.received_notice", Map.of(
-                "amount", String.valueOf(amount)
-        ));
+        plugin.getLanguageManager().sendMessage(sender, "creature-bundle.given_success",
+                "{player}", targetPlayer.getName(),
+                "{amount}", String.valueOf(amount)
+        );
+        plugin.getLanguageManager().sendMessage(targetPlayer, "creature-bundle.received_notice",
+                "{amount}", String.valueOf(amount)
+        );
         return true;
     }
 

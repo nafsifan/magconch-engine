@@ -17,14 +17,13 @@ import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
-import org.bukkit.entity.Villager;
 import org.bukkit.entity.WanderingTrader;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -38,9 +37,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 生灵收纳袋交互与安全监听器
+ * 生物捕捉系统交互与安全监听器
  * <p>
- * 严谨处理潜行收纳、安全释放，并建立防刷物、防偷宠、防卡墙与原版容器隔离防线。
+ * 严密处理喷溅药水命中捕获（原地掉落生物蛋）、安全放生还原，并构建防刷怪笼、防幼崽繁殖与防发射器安全防线。
  */
 public class BundleInteractListener implements Listener {
 
@@ -70,125 +69,102 @@ public class BundleInteractListener implements Listener {
     }
 
     // ==========================================
-    // 1. 捕获逻辑 (潜行 + 右键生物)
+    // 1. 喷溅药水捕捉逻辑 (原地掉落生物蛋)
     // ==========================================
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onCaptureEntity(PlayerInteractEntityEvent event) {
-        // 1. 仅限主手交互，彻底规避双发漏洞
-        if (event.getHand() != EquipmentSlot.HAND) {
+    public void onPotionSplash(PotionSplashEvent event) {
+        ItemStack potionItem = event.getPotion().getItem();
+        if (!BundleItemUtil.isCapturePotion(potionItem, plugin)) {
             return;
         }
 
-        Player player = event.getPlayer();
-        ItemStack mainHand = player.getInventory().getItemInMainHand();
-
-        // 2. 检查玩家是否手持空白生灵袋且处于潜行状态
-        if (!player.isSneaking() || !BundleItemUtil.isEmptyBundle(mainHand, plugin)) {
-            return;
-        }
-
-        // 3. 一旦判定为尝试收纳，立即拦截原版实体交互（避免弹出交易、骑乘或让宠物坐下）
+        // 默认取消药水的常规虚弱/发光效果扩散，转为纯净的封印逻辑
         event.setCancelled(true);
 
-        // 4. 权限校验
-        if (!player.hasPermission("magconch.use.bundle")) {
-            plugin.getLanguageManager().sendMessage(player, "creature-bundle.no_permission");
-            return;
-        }
-
-        // 5. 目标实体合法性检测
-        Entity target = event.getRightClicked();
-        if (!(target instanceof LivingEntity livingEntity) || target instanceof Player || target instanceof ArmorStand) {
-            plugin.getLanguageManager().sendMessage(player, "creature-bundle.invalid_entity");
-            return;
-        }
-
-        // 6. 流浪商人排除
-        if (target instanceof WanderingTrader) {
-            plugin.getLanguageManager().sendMessage(player, "creature-bundle.wandering_trader_denied");
-            return;
-        }
-
-        // 7. 濒死/无效实体防御
-        if (livingEntity.isDead() || livingEntity.getHealth() <= 0 || !livingEntity.isValid()) {
-            plugin.getLanguageManager().sendMessage(player, "creature-bundle.dead_entity");
-            return;
-        }
-
-        // 8. 载具与乘客关系校验
-        if (!livingEntity.getPassengers().isEmpty() || livingEntity.getVehicle() != null) {
-            plugin.getLanguageManager().sendMessage(player, "creature-bundle.riding_entity");
-            return;
-        }
-
-        // 9. 生物种类白名单检查 (已自动排除服主禁用的黑名单)
-        if (!config.isAllowed(livingEntity.getType())) {
-            plugin.getLanguageManager().sendMessage(player, "creature-bundle.type_not_allowed");
-            return;
-        }
-
-        // 10. 驯服宠物所有权校验（内置防盗宠机制）
-        if (livingEntity instanceof Tameable tameable && tameable.isTamed()) {
-            if (tameable.getOwnerUniqueId() != null
-                    && !tameable.getOwnerUniqueId().equals(player.getUniqueId())
-                    && !player.hasPermission("magconch.bypass.bundle")) {
-                plugin.getLanguageManager().sendMessage(player, "creature-bundle.not_owner");
+        // 投掷者判定（优先玩家，无投掷玩家时按规则校验）
+        Player thrower = null;
+        if (event.getPotion().getShooter() instanceof Player player) {
+            thrower = player;
+            if (!thrower.hasPermission("magconch.use.bundle")) {
+                plugin.getLanguageManager().sendMessage(thrower, "creature-bundle.no_permission");
                 return;
             }
         }
 
-        // 12. 拴绳安全回收
-        if (livingEntity.isLeashed()) {
-            livingEntity.setLeashHolder(null);
-            ItemStack leash = new ItemStack(Material.LEAD, 1);
-            Map<Integer, ItemStack> leftover = player.getInventory().addItem(leash);
-            if (!leftover.isEmpty()) {
-                for (ItemStack drop : leftover.values()) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), drop);
+        Location splashLoc = event.getPotion().getLocation();
+
+        // 寻找溅射半径内离落点最近的合法生物（单次精准捕获 1 只）
+        LivingEntity captured = null;
+        double minDistanceSq = Double.MAX_VALUE;
+
+        for (LivingEntity living : event.getAffectedEntities()) {
+            if (isEligibleTarget(living, thrower)) {
+                double distSq = living.getLocation().distanceSquared(splashLoc);
+                if (distSq < minDistanceSq) {
+                    minDistanceSq = distSq;
+                    captured = living;
                 }
             }
         }
 
-        // 13. 创建实体快照与封存生灵袋
-        EntitySnapshot snapshot = livingEntity.createSnapshot();
-        ItemStack filledBundle = BundleItemUtil.createFilledBundle(plugin, livingEntity, snapshot, config.getCustomModelData());
-
-        // 14. 原子化物品扣减与替换（防止高频并发丢弃刷物）
-        int amount = mainHand.getAmount();
-        if (amount <= 1) {
-            player.getInventory().setItemInMainHand(filledBundle);
-        } else {
-            mainHand.setAmount(amount - 1);
-            player.getInventory().setItemInMainHand(mainHand);
-            Map<Integer, ItemStack> leftover = player.getInventory().addItem(filledBundle);
-            if (!leftover.isEmpty()) {
-                for (ItemStack drop : leftover.values()) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), drop);
-                }
-            }
+        if (captured == null) {
+            // 未命中任何有效生物，仅播放药水破碎声与粒子
+            splashLoc.getWorld().playSound(splashLoc, Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
+            splashLoc.getWorld().spawnParticle(Particle.WITCH, splashLoc, 20, 0.4, 0.4, 0.4, 0.05);
+            return;
         }
 
-        // 15. 安全注销原实体
-        livingEntity.remove();
+        Location entityLoc = captured.getLocation();
 
-        // 16. 视听反馈
-        Location eyeLoc = livingEntity.getEyeLocation();
-        player.playSound(player.getLocation(), Sound.ITEM_BUNDLE_INSERT, 1.0f, 1.2f);
-        player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.4f, 1.6f);
-        player.spawnParticle(Particle.PORTAL, eyeLoc, 25, 0.3, 0.3, 0.3, 0.1);
+        // 捕捉概率校验 (默认 1.0 即 100% 成功)
+        double chance = config.getCaptureChance();
+        if (chance < 1.0 && java.util.concurrent.ThreadLocalRandom.current().nextDouble() > chance) {
+            // 判定失败：播放生物挣脱的灰色烟雾与咆哮声，生物安全保留
+            entityLoc.getWorld().playSound(entityLoc, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.2f);
+            entityLoc.getWorld().spawnParticle(Particle.SMOKE, entityLoc.clone().add(0, 0.5, 0), 25, 0.3, 0.3, 0.3, 0.05);
+            if (thrower != null) {
+                String targetName = BundleItemUtil.resolveEntityDisplayName(captured);
+                plugin.getLanguageManager().sendMessage(thrower, "creature-bundle.failed", "{entity}", targetName);
+            }
+            return;
+        }
 
-        String entityName = BundleItemUtil.resolveEntityDisplayName(livingEntity);
-        plugin.getLanguageManager().sendMessage(player, "creature-bundle.captured", Map.of("entity", entityName));
+        // 拴绳安全回收
+        if (captured.isLeashed()) {
+            captured.setLeashHolder(null);
+            captured.getWorld().dropItemNaturally(entityLoc, new ItemStack(Material.LEAD, 1));
+        }
+
+        // 创建实体完整快照并生成封存刷怪蛋
+        EntitySnapshot snapshot = captured.createSnapshot();
+        ItemStack filledEgg = BundleItemUtil.createFilledEgg(plugin, captured, snapshot, config.getCustomModelData());
+
+        // 原地安全掉落封存刷怪蛋
+        captured.getWorld().dropItemNaturally(entityLoc, filledEgg);
+
+        // 视听反馈：雷电魔法共鸣与图腾灵魂粒子
+        captured.getWorld().playSound(entityLoc, Sound.ITEM_TOTEM_USE, 0.8f, 1.4f);
+        captured.getWorld().playSound(entityLoc, Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
+        captured.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, entityLoc.clone().add(0, 0.5, 0), 30, 0.3, 0.5, 0.3, 0.1);
+        captured.getWorld().spawnParticle(Particle.PORTAL, entityLoc.clone().add(0, 0.5, 0), 25, 0.4, 0.4, 0.4, 0.2);
+
+        String entityName = BundleItemUtil.resolveEntityDisplayName(captured);
+
+        // 注销原实体
+        captured.remove();
+
+        if (thrower != null) {
+            plugin.getLanguageManager().sendMessage(thrower, "creature-bundle.captured", "{entity}", entityName);
+        }
     }
 
     // ==========================================
-    // 2. 释放逻辑 (手持封存袋右键方块表面)
+    // 2. 释放逻辑 (手持生物蛋右键方块表面)
     // ==========================================
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onReleaseEntity(PlayerInteractEvent event) {
-        // 1. 仅限主手右键方块
+    public void onReleaseEgg(PlayerInteractEvent event) {
         if (event.getHand() != EquipmentSlot.HAND || event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
@@ -196,30 +172,34 @@ public class BundleInteractListener implements Listener {
         Player player = event.getPlayer();
         ItemStack mainHand = player.getInventory().getItemInMainHand();
 
-        // 2. 判定是否为已封存生灵袋
-        if (!BundleItemUtil.isFilledBundle(mainHand, plugin)) {
+        if (!BundleItemUtil.isFilledEgg(mainHand, plugin)) {
             return;
         }
 
-        // 3. 拦截原版收纳袋右键弹出行为
+        // 一律拦截原版刷怪蛋行为（防止原版白板怪生成机制触发）
         event.setCancelled(true);
 
-        // 4. 权限校验
-        if (!player.hasPermission("magconch.use.bundle")) {
-            plugin.getLanguageManager().sendMessage(player, "creature-bundle.no_permission");
+        Block clickedBlock = event.getClickedBlock();
+        if (clickedBlock == null) {
             return;
         }
 
-        // 5. 方块与生成位置安全计算
-        Block clickedBlock = event.getClickedBlock();
-        if (clickedBlock == null) {
+        // 防御 1: 绝对禁止右键刷怪笼（防止原版将刷怪笼类型改写）
+        if (clickedBlock.getType() == Material.SPAWNER) {
+            plugin.getLanguageManager().sendMessage(player, "creature-bundle.spawner_denied");
+            return;
+        }
+
+        // 权限校验
+        if (!player.hasPermission("magconch.use.bundle")) {
+            plugin.getLanguageManager().sendMessage(player, "creature-bundle.no_permission");
             return;
         }
 
         BlockFace face = event.getBlockFace();
         Block spawnBlock = clickedBlock.getRelative(face);
 
-        // 6. 危险方块与空间检测
+        // 危险方块与空间检测
         if (DANGEROUS_BLOCKS.contains(spawnBlock.getType()) || DANGEROUS_BLOCKS.contains(clickedBlock.getType())) {
             plugin.getLanguageManager().sendMessage(player, "creature-bundle.dangerous_location");
             return;
@@ -230,13 +210,13 @@ public class BundleInteractListener implements Listener {
             return;
         }
 
-        // 7. 下界基岩顶层限制
+        // 下界基岩顶层限制
         if (spawnBlock.getWorld().getEnvironment() == org.bukkit.World.Environment.NETHER && spawnBlock.getY() >= 127) {
             plugin.getLanguageManager().sendMessage(player, "creature-bundle.dangerous_location");
             return;
         }
 
-        // 8. 提取快照 NBT 数据并反序列化实体
+        // 提取快照 NBT 并反序列化完整实体
         PersistentDataContainer pdc = mainHand.getItemMeta().getPersistentDataContainer();
         NamespacedKey dataKey = new NamespacedKey(plugin, BundleItemUtil.KEY_DATA);
         String snbt = pdc.get(dataKey, PersistentDataType.STRING);
@@ -250,23 +230,23 @@ public class BundleInteractListener implements Listener {
         try {
             snapshot = Bukkit.getEntityFactory().createEntitySnapshot(snbt);
         } catch (Exception ex) {
-            plugin.getLogger().warning("解析生灵袋快照失败: " + ex.getMessage());
+            plugin.getLogger().warning("解析封存刷怪蛋快照失败: " + ex.getMessage());
             plugin.getLanguageManager().sendMessage(player, "creature-bundle.corrupted_data");
             return;
         }
 
-        // 9. 计算生成精确坐标（方块水平中心偏上）并让实体朝向玩家
+        // 计算生成精确坐标并朝向玩家
         Location spawnLoc = spawnBlock.getLocation().add(0.5, 0.05, 0.5);
         Vector lookDir = player.getLocation().toVector().subtract(spawnLoc.toVector()).setY(0);
         if (lookDir.lengthSquared() > 0.001) {
             spawnLoc.setDirection(lookDir);
         }
 
-        // 10. 生成实体并确保主线程世界安全
+        // 在主线程安全生成具有完整 NBT 的实体
         Entity spawned = snapshot.createEntity(spawnLoc);
         spawned.setVelocity(new Vector(0, 0, 0));
 
-        // 11. 消耗封存生灵袋
+        // 消耗 1 枚封存蛋
         int amount = mainHand.getAmount();
         if (amount <= 1) {
             player.getInventory().setItemInMainHand(null);
@@ -275,61 +255,64 @@ public class BundleInteractListener implements Listener {
             player.getInventory().setItemInMainHand(mainHand);
         }
 
-        // 12. 视听反馈
-        spawnBlock.getWorld().playSound(spawnLoc, Sound.ITEM_BUNDLE_DROP_CONTENTS, 1.0f, 1.0f);
-        spawnBlock.getWorld().playSound(spawnLoc, Sound.ENTITY_CHICKEN_EGG, 0.8f, 1.2f);
-        spawnBlock.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, spawnLoc.clone().add(0, 0.5, 0), 16, 0.3, 0.3, 0.3, 0.0);
-
-        String entityName = pdc.get(new NamespacedKey(plugin, BundleItemUtil.KEY_NAME), PersistentDataType.STRING);
-        if (entityName == null || entityName.isEmpty()) {
-            entityName = BundleItemUtil.getChineseEntityName(snapshot.getEntityType());
-        }
-        plugin.getLanguageManager().sendMessage(player, "creature-bundle.released", Map.of("entity", entityName));
+        // 视听反馈：破壳音效与村民爱心粒子
+        spawnBlock.getWorld().playSound(spawnLoc, Sound.ENTITY_TURTLE_EGG_CRACK, 1.0f, 1.2f);
+        spawnBlock.getWorld().playSound(spawnLoc, Sound.ENTITY_CHICKEN_EGG, 1.0f, 1.0f);
+        spawnBlock.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, spawnLoc.clone().add(0, 0.5, 0), 18, 0.3, 0.3, 0.3, 0.0);
     }
 
     // ==========================================
-    // 3. 原版收纳袋容器隔离与防伪造合成防御
+    // 3. 安全防御逻辑 (防生幼崽、防发射器、防合成)
     // ==========================================
 
     /**
-     * 严禁将生灵袋放入工作台进行染色或二次合成（防止 PDC 抹除或刷物）
+     * 防御 2: 拦截手持封存刷怪蛋右键同类成年生物触发原版幼崽繁殖
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPrepareCraft(PrepareItemCraftEvent event) {
-        ItemStack[] matrix = event.getInventory().getMatrix();
-        for (ItemStack item : matrix) {
-            if (BundleItemUtil.isAnyCreatureBundle(item, plugin)) {
-                event.getInventory().setResult(null);
-                return;
-            }
+    public void onInteractEntityWithEgg(PlayerInteractEntityEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+        ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
+        if (BundleItemUtil.isFilledEgg(item, plugin)) {
+            event.setCancelled(true);
         }
     }
 
     /**
-     * 拦截原版收纳袋背包内点击交互，防止常规物品被拖拽塞入生灵袋
+     * 防御 3: 拦截发射器发射封灵药水与封存刷怪蛋（防止绕过插件判定生成原版白板怪）
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event) {
-        ItemStack current = event.getCurrentItem();
-        ItemStack cursor = event.getCursor();
-
-        boolean currentIsBundle = BundleItemUtil.isAnyCreatureBundle(current, plugin);
-        boolean cursorIsBundle = BundleItemUtil.isAnyCreatureBundle(cursor, plugin);
-
-        // 如果点击的两者之一是生灵袋，且另一个不是空气（试图拖动物品放入 Bundle 或取出）
-        if (currentIsBundle && cursor != null && !cursor.getType().isAir()) {
-            event.setCancelled(true);
-            return;
-        }
-
-        if (cursorIsBundle && current != null && !current.getType().isAir()) {
-            event.setCancelled(true);
-            return;
-        }
-
-        // 拦截针对收纳袋的快捷放入动作
-        if (event.getAction() == InventoryAction.SWAP_WITH_CURSOR && (currentIsBundle || cursorIsBundle)) {
+    public void onDispenseModuleItem(BlockDispenseEvent event) {
+        ItemStack item = event.getItem();
+        if (BundleItemUtil.isAnyModuleItem(item, plugin)) {
             event.setCancelled(true);
         }
+    }
+
+    /**
+     * 防御 4: 严禁将封灵药水或封存刷怪蛋放入工作台进行合成或洗白
+     */
+    /**
+     * 校验生物是否满足封印捕获条件
+     */
+    private boolean isEligibleTarget(LivingEntity living, Player thrower) {
+        if (living instanceof Player || living instanceof ArmorStand || living instanceof WanderingTrader) {
+            return false;
+        }
+        if (living.isDead() || living.getHealth() <= 0 || !living.isValid()) {
+            return false;
+        }
+        if (!living.getPassengers().isEmpty() || living.getVehicle() != null) {
+            return false;
+        }
+        if (!config.isAllowed(living.getType())) {
+            return false;
+        }
+        if (living instanceof Tameable tameable && tameable.isTamed()) {
+            return tameable.getOwnerUniqueId() == null
+                    || (thrower != null && (tameable.getOwnerUniqueId().equals(thrower.getUniqueId()) || thrower.hasPermission("magconch.bypass.bundle")));
+        }
+        return true;
     }
 }

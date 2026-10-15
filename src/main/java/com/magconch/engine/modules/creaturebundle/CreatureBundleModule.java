@@ -13,9 +13,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 
 /**
- * 生灵收纳袋模块生命周期实现
+ * 生物捕捉模块生命周期实现
  * <p>
- * 基于收纳袋与 EntitySnapshot 原生快照技术，提供平衡、安全、无损的生物打包运输方案。
+ * 基于捕捉喷溅药水、生物蛋与 EntitySnapshot 原生快照技术，提供平衡、安全、无损的生物运输方案。
  */
 public class CreatureBundleModule implements EngineModule {
 
@@ -58,7 +58,7 @@ public class CreatureBundleModule implements EngineModule {
             plugin.getMainCommand().registerSubCommand(bundleSubCommand);
         }
 
-        // 3. 注册工作台合成配方（环绕 8 末影珍珠 + 1 收纳袋）
+        // 3. 注册工作台合成配方（炼金星芒十字阵）
         registerCraftingRecipe();
 
         // 4. 注册事件监听器
@@ -68,9 +68,6 @@ public class CreatureBundleModule implements EngineModule {
         }
 
         this.enabled = config.isEnabled();
-        if (enabled) {
-            plugin.getLogger().info("[生灵收纳袋] 模块已成功加载并启动。");
-        }
     }
 
     @Override
@@ -85,7 +82,6 @@ public class CreatureBundleModule implements EngineModule {
         }
 
         this.enabled = false;
-        plugin.getLogger().info("[生灵收纳袋] 模块已安全卸载。");
     }
 
     @Override
@@ -109,7 +105,12 @@ public class CreatureBundleModule implements EngineModule {
     // ==========================================
 
     /**
-     * 注册生灵收纳袋工作台合成配方
+     * 注册捕捉喷溅药水工作台合成配方（炼金星芒十字阵）
+     * <pre>
+     * [ 空 ]   [ 不死图腾 ]   [ 空 ]
+     * [末影珍珠] [喷溅虚弱药水] [末影珍珠]
+     * [ 空 ]     [ 鸡蛋 ]     [ 空 ]
+     * </pre>
      */
     private void registerCraftingRecipe() {
         // 先清理可能存在的同键旧配方
@@ -119,21 +120,22 @@ public class CreatureBundleModule implements EngineModule {
             return;
         }
 
-        ItemStack emptyBundle = BundleItemUtil.createEmptyBundle(plugin, config.getCustomModelData());
-        ShapedRecipe recipe = new ShapedRecipe(recipeKey, emptyBundle);
+        ItemStack potionResult = BundleItemUtil.createCapturePotion(plugin, config.getCustomModelData());
+        ShapedRecipe recipe = new ShapedRecipe(recipeKey, potionResult);
         recipe.shape(
-                "PPP",
-                "PBP",
-                "PPP"
+                " T ",
+                "EPE",
+                " G "
         );
-        recipe.setIngredient('P', Material.ENDER_PEARL);
-        recipe.setIngredient('B', Material.BUNDLE);
+        recipe.setIngredient('T', Material.TOTEM_OF_UNDYING);
+        recipe.setIngredient('E', Material.ENDER_PEARL);
+        recipe.setIngredient('P', Material.SPLASH_POTION);
+        recipe.setIngredient('G', Material.EGG);
 
         try {
             plugin.getServer().addRecipe(recipe);
-            plugin.getLogger().info("[生灵收纳袋] 已注册工作台合成配方 (8 末影珍珠 + 1 收纳袋)。");
         } catch (Exception ex) {
-            plugin.getLogger().warning("[生灵收纳袋] 注册合成配方失败: " + ex.getMessage());
+            plugin.getLogger().warning("[生物捕捉] 注册合成配方失败: " + ex.getMessage());
         }
     }
 

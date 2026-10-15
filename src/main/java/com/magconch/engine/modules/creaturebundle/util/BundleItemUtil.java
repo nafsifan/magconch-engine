@@ -2,6 +2,7 @@ package com.magconch.engine.modules.creaturebundle.util;
 
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.util.TextUtil;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -14,17 +15,21 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * 生灵收纳袋物品构建与数据持久化工具
+ * 生物捕捉系统物品构建与持久化工具
  * <p>
- * 基于 Paper 原生 PDC 管理容器状态与实体快照，严格封装 Data Components 数据。
+ * 支持构建与判别「捕捉喷溅药水」与「生物蛋」，严格通过 PDC 维护完整的 EntitySnapshot。
  */
 public final class BundleItemUtil {
 
@@ -39,8 +44,8 @@ public final class BundleItemUtil {
     public static final String KEY_HEALTH = "creature_bundle_health";
     public static final String KEY_MAX_HEALTH = "creature_bundle_max_health";
 
-    public static final String STATE_EMPTY = "empty";
-    public static final String STATE_FILLED = "filled";
+    public static final String STATE_POTION = "capture_potion";
+    public static final String STATE_FILLED_EGG = "filled_egg";
 
     private BundleItemUtil() {
         // 工具类私有构造
@@ -51,14 +56,10 @@ public final class BundleItemUtil {
     // ==========================================
 
     /**
-     * 判断物品是否为空白的生灵收纳袋
-     *
-     * @param item   待检测物品
-     * @param plugin 插件实例
-     * @return 若是空白生灵袋则返回 true
+     * 判断物品是否为捕捉喷溅药水
      */
-    public static boolean isEmptyBundle(ItemStack item, MagconchEngine plugin) {
-        if (item == null || item.getType() != Material.BUNDLE) {
+    public static boolean isCapturePotion(ItemStack item, MagconchEngine plugin) {
+        if (item == null || item.getType() != Material.SPLASH_POTION) {
             return false;
         }
         ItemMeta meta = item.getItemMeta();
@@ -67,18 +68,14 @@ public final class BundleItemUtil {
         }
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         NamespacedKey stateKey = new NamespacedKey(plugin, KEY_STATE);
-        return STATE_EMPTY.equals(pdc.get(stateKey, PersistentDataType.STRING));
+        return STATE_POTION.equals(pdc.get(stateKey, PersistentDataType.STRING));
     }
 
     /**
-     * 判断物品是否为已封存生物的生灵收纳袋
-     *
-     * @param item   待检测物品
-     * @param plugin 插件实例
-     * @return 若是已封存生灵袋则返回 true
+     * 判断物品是否为已封存生物的生物蛋
      */
-    public static boolean isFilledBundle(ItemStack item, MagconchEngine plugin) {
-        if (item == null || item.getType() != Material.BUNDLE) {
+    public static boolean isFilledEgg(ItemStack item, MagconchEngine plugin) {
+        if (item == null) {
             return false;
         }
         ItemMeta meta = item.getItemMeta();
@@ -87,18 +84,14 @@ public final class BundleItemUtil {
         }
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         NamespacedKey stateKey = new NamespacedKey(plugin, KEY_STATE);
-        return STATE_FILLED.equals(pdc.get(stateKey, PersistentDataType.STRING));
+        return STATE_FILLED_EGG.equals(pdc.get(stateKey, PersistentDataType.STRING));
     }
 
     /**
-     * 判断物品是否为任何形态的生灵收纳袋（空白或已封存）
-     *
-     * @param item   待检测物品
-     * @param plugin 插件实例
-     * @return 若是生灵袋则返回 true
+     * 判断物品是否为生灵模块专属的任何特殊道具
      */
-    public static boolean isAnyCreatureBundle(ItemStack item, MagconchEngine plugin) {
-        if (item == null || item.getType() != Material.BUNDLE) {
+    public static boolean isAnyModuleItem(ItemStack item, MagconchEngine plugin) {
+        if (item == null) {
             return false;
         }
         ItemMeta meta = item.getItemMeta();
@@ -115,36 +108,40 @@ public final class BundleItemUtil {
     // ==========================================
 
     /**
-     * 构建一个崭新的空白生灵收纳袋
+     * 构建一瓶崭新的「捕捉喷溅药水」
      *
      * @param plugin          插件主实例
      * @param customModelData 自定义材质模型 ID（0 则不设置）
-     * @return 空白生灵袋物品
+     * @return 捕捉喷溅药水物品
      */
-    public static ItemStack createEmptyBundle(MagconchEngine plugin, int customModelData) {
-        ItemStack item = new ItemStack(Material.BUNDLE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
+    public static ItemStack createCapturePotion(MagconchEngine plugin, int customModelData) {
+        ItemStack item = new ItemStack(Material.SPLASH_POTION);
+        ItemMeta rawMeta = item.getItemMeta();
+        if (rawMeta instanceof PotionMeta meta) {
+            // 设置神秘深紫青色调
+            meta.setColor(Color.fromRGB(138, 43, 226));
+            meta.setBasePotionType(PotionType.WEAKNESS);
+            meta.addCustomEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 0), true);
+
             // 写入 PDC 状态
             NamespacedKey stateKey = new NamespacedKey(plugin, KEY_STATE);
-            meta.getPersistentDataContainer().set(stateKey, PersistentDataType.STRING, STATE_EMPTY);
+            meta.getPersistentDataContainer().set(stateKey, PersistentDataType.STRING, STATE_POTION);
 
-            // 模型值支持
             if (customModelData > 0) {
                 meta.setCustomModelData(customModelData);
             }
 
             // 从语言包渲染名称与说明
-            String name = plugin.getLanguageManager().getMessage("creature-bundle.item.empty_name");
+            String name = plugin.getLanguageManager().getMessage("creature-bundle.item.potion_name");
             meta.setDisplayName(name);
 
-            List<String> rawLore = plugin.getLanguageManager().getMessageList("creature-bundle.item.empty_lore");
-            meta.setLore(rawLore);
+            List<String> rawLore = plugin.getLanguageManager().getMessageList("creature-bundle.item.potion_lore");
+            meta.setLore(TextUtil.colorize(rawLore));
 
-            // 附魔流光与神秘属性展示
+            // 附魔流光效果
             meta.setEnchantmentGlintOverride(true);
-            meta.addEnchant(Enchantment.UNBREAKING, 3, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
 
             item.setItemMeta(meta);
         }
@@ -152,20 +149,21 @@ public final class BundleItemUtil {
     }
 
     /**
-     * 将目标生物封存入收纳袋，构建单堆叠的封存生灵袋
+     * 将目标生物封存入对应的原版刷怪蛋，构建单堆叠的生物蛋
      *
      * @param plugin          插件实例
      * @param entity          原生物实体
      * @param snapshot        实体完整快照
      * @param customModelData 模型 ID
-     * @return 封存生灵袋物品（堆叠数为 1）
+     * @return 生物蛋物品
      */
-    public static ItemStack createFilledBundle(MagconchEngine plugin, LivingEntity entity, EntitySnapshot snapshot, int customModelData) {
-        ItemStack item = new ItemStack(Material.BUNDLE, 1);
+    public static ItemStack createFilledEgg(MagconchEngine plugin, LivingEntity entity, EntitySnapshot snapshot, int customModelData) {
+        Material eggMaterial = resolveSpawnEggMaterial(entity.getType());
+        ItemStack item = new ItemStack(eggMaterial, 1);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
-            pdc.set(new NamespacedKey(plugin, KEY_STATE), PersistentDataType.STRING, STATE_FILLED);
+            pdc.set(new NamespacedKey(plugin, KEY_STATE), PersistentDataType.STRING, STATE_FILLED_EGG);
             pdc.set(new NamespacedKey(plugin, KEY_DATA), PersistentDataType.STRING, snapshot.getAsString());
             pdc.set(new NamespacedKey(plugin, KEY_TYPE), PersistentDataType.STRING, entity.getType().name());
 
@@ -182,17 +180,16 @@ public final class BundleItemUtil {
             pdc.set(new NamespacedKey(plugin, KEY_HEALTH), PersistentDataType.DOUBLE, health);
             pdc.set(new NamespacedKey(plugin, KEY_MAX_HEALTH), PersistentDataType.DOUBLE, maxHealth);
 
-            // 模型 ID
             if (customModelData > 0) {
                 meta.setCustomModelData(customModelData);
             }
 
             // 渲染封存物品名称
-            String title = plugin.getLanguageManager().getMessage("creature-bundle.item.filled_name", "{entity_name}", displayName);
+            String title = plugin.getLanguageManager().getMessage("creature-bundle.item.filled_egg_name", "{entity_name}", displayName);
             meta.setDisplayName(title);
 
             // 渲染 Lore 信息
-            List<String> loreTemplate = plugin.getLanguageManager().getMessageList("creature-bundle.item.filled_lore");
+            List<String> loreTemplate = plugin.getLanguageManager().getMessageList("creature-bundle.item.filled_egg_lore");
             String extraInfo = resolveExtraInfo(entity);
             String formattedHealth = String.format(Locale.ROOT, "%.1f", health);
             String formattedMaxHealth = String.format(Locale.ROOT, "%.1f", maxHealth);
@@ -208,14 +205,27 @@ public final class BundleItemUtil {
             }
             meta.setLore(TextUtil.colorize(renderedLore));
 
-            // 附魔流光与神秘属性展示
+            // 附魔流光效果
             meta.setEnchantmentGlintOverride(true);
-            meta.addEnchant(Enchantment.UNBREAKING, 3, true);
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
             item.setItemMeta(meta);
         }
         return item;
+    }
+
+    /**
+     * 动态匹配生物类型对应的原版刷怪蛋材质，无法匹配时兜底为普通鸡蛋
+     */
+    public static Material resolveSpawnEggMaterial(EntityType type) {
+        String eggName = type.name() + "_SPAWN_EGG";
+        Material match = Material.matchMaterial(eggName);
+        if (match != null && match.isItem()) {
+            return match;
+        }
+        // 针对没有对应刷怪蛋的特殊实体做兼容兜底
+        return Material.EGG;
     }
 
     /**
@@ -225,7 +235,6 @@ public final class BundleItemUtil {
         if (entity.getCustomName() != null && !entity.getCustomName().trim().isEmpty()) {
             return entity.getCustomName();
         }
-        // 返回易读的生物中文友好译名
         return getChineseEntityName(entity.getType());
     }
 
