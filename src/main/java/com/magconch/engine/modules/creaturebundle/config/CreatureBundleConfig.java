@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  * 生物捕捉模块配置映射
  * <p>
- * 采用“内置全量友好生物 + 轻量黑名单排除”模型，配置极致精炼。
+ * 采用配置文件显式白名单驱动，服主可自由配置允许捕捉的生物类型。
  */
 public class CreatureBundleConfig {
 
@@ -66,35 +66,40 @@ public class CreatureBundleConfig {
 
         this.captureChance = Math.max(0.0, Math.min(1.0, config.getDouble(path + "capture-chance", 1.0)));
 
-        // 1. 初始化内置友好/被动/功能生物白名单
+        // 读取允许捕捉的生物白名单
         this.allowedEntityTypes.clear();
-        loadDefaultAllowedTypes();
-
-        // 2. 从配置中排除服主指定禁用的生物类型
-        List<String> disabledRaw = config.getStringList(path + "disabled-entities");
-        for (String raw : disabledRaw) {
-            try {
-                EntityType type = EntityType.valueOf(raw.trim().toUpperCase(Locale.ROOT));
-                this.allowedEntityTypes.remove(type);
-            } catch (IllegalArgumentException ignored) {
-                // 忽略非法的枚举输入
+        List<String> rawAllowed = config.getStringList(path + "allowed-entities");
+        if (rawAllowed != null && !rawAllowed.isEmpty()) {
+            for (String raw : rawAllowed) {
+                try {
+                    EntityType type = EntityType.valueOf(raw.trim().toUpperCase(Locale.ROOT));
+                    this.allowedEntityTypes.add(type);
+                } catch (IllegalArgumentException ignored) {
+                    // 忽略无效的实体类型枚举
+                }
             }
+        } else {
+            // 配置未指定白名单时，加载默认全量生物清单
+            loadDefaultAllowedTypes();
         }
     }
 
     /**
-     * 内置支持的友好与功能型生物清单
+     * 默认支持的全量生物清单（含友好农场生物与常见生电敌对生物）
      */
     private void loadDefaultAllowedTypes() {
         Collections.addAll(allowedEntityTypes,
                 EntityType.COW, EntityType.SHEEP, EntityType.PIG, EntityType.CHICKEN,
                 EntityType.RABBIT, EntityType.BEE, EntityType.TURTLE, EntityType.FROG,
                 EntityType.AXOLOTL, EntityType.SQUID, EntityType.GLOW_SQUID, EntityType.MOOSHROOM,
-                EntityType.GOAT, EntityType.HORSE, EntityType.DONKEY, EntityType.MULE,
-                EntityType.LLAMA, EntityType.TRADER_LLAMA, EntityType.CAMEL, EntityType.SNIFFER,
-                EntityType.ARMADILLO, EntityType.STRIDER, EntityType.ALLAY, EntityType.WOLF,
-                EntityType.CAT, EntityType.PARROT, EntityType.OCELOT, EntityType.FOX,
-                EntityType.VILLAGER, EntityType.ZOMBIE_VILLAGER, EntityType.SNOW_GOLEM
+                EntityType.GOAT, EntityType.SNOW_GOLEM, EntityType.HORSE, EntityType.DONKEY,
+                EntityType.MULE, EntityType.LLAMA, EntityType.TRADER_LLAMA, EntityType.CAMEL,
+                EntityType.STRIDER, EntityType.WOLF, EntityType.CAT, EntityType.PARROT,
+                EntityType.OCELOT, EntityType.FOX, EntityType.ALLAY, EntityType.SNIFFER,
+                EntityType.ARMADILLO, EntityType.VILLAGER, EntityType.ZOMBIE_VILLAGER,
+                EntityType.SHULKER, EntityType.ZOMBIE, EntityType.HUSK, EntityType.DROWNED,
+                EntityType.SKELETON, EntityType.STRAY, EntityType.SLIME, EntityType.MAGMA_CUBE,
+                EntityType.HOGLIN, EntityType.ZOGLIN
         );
     }
 
