@@ -165,6 +165,12 @@ public class UndoBlockListener implements Listener {
             return;
         }
 
+        // 校验手持物一致性：若已切换为工具或其他物品，判定为主动采掘行为，直接放行
+        Material handType = player.getInventory().getItemInMainHand().getType();
+        if (handType != record.getItem().getType() && !handType.isAir()) {
+            return;
+        }
+
         // 检查是否在超时窗口内，且当前方块材质仍与放置物一致
         long now = System.currentTimeMillis();
         if (now - record.getTimestamp() > module.getTimeoutMillis()
