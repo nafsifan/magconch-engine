@@ -46,6 +46,7 @@ permissions:
       magconch.use.bundle: true
       magconch.command.bundle: true
       magconch.bypass.bundle: true
+      magconch.expstore.use: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -82,3 +83,6 @@ permissions:
   magconch.bypass.bundle:
     description: 豁免生物捕捉宠物主人限制与管理特权
     default: op
+  magconch.expstore.use:
+    description: 允许使用附魔台灌装和使用经验瓶
+    default: true

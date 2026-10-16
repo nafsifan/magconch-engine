@@ -134,3 +134,11 @@ creature-bundle:
   received_notice: >-
     {prefix}&#52c41aYou received &#fadb14{amount}
     &#52c41acapture splash potion(s).
+
+exp-store:
+  item:
+    name: "&#52c41a&lExperience Bottle"
+  insufficient: >-
+    {prefix}&#ff4d4fNot enough experience to condense
+    an experience bottle.
+  no_permission: "{prefix}&#ff4d4fYou lack permission to use exp storage."

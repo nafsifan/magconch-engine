@@ -80,3 +80,15 @@ modules:
     custom-model-data: 0
     # 额外禁止捕捉的生物类型 (可选，如需禁用村民则填入 [VILLAGER, ZOMBIE_VILLAGER])
     disabled-entities: []
+
+  # 经验存储系统（潜行右键附魔台灌装与直接吸收）
+  exp-store:
+    enabled: true
+    # 每瓶封存的固定经验点数（默认 100 点，约合 0~7 级，64 瓶即 6400 点/约 53 级）
+    points-per-bottle: 100
+    # 是否播放灌装与吸收音效
+    sound-enabled: true
+    # 是否生成附魔台粒子动画
+    particle-enabled: true
+    # 自定义材质模型 ID (0 为原版默认外观)
+    custom-model-data: 0

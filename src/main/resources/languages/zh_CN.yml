@@ -115,3 +115,9 @@ creature-bundle:
     {prefix}&#52c41a已给予玩家 &#f0f0f0{player}
     &#fadb14{amount} &#52c41a瓶捕捉喷溅药水。
   received_notice: "{prefix}&#52c41a你收到了 &#fadb14{amount} &#52c41a瓶捕捉喷溅药水。"
+
+exp-store:
+  item:
+    name: "&#52c41a&l经验瓶"
+  insufficient: "{prefix}&#ff4d4f身上的经验不足以凝聚经验瓶。"
+  no_permission: "{prefix}&#ff4d4f你没有使用经验封存功能的权限。"
