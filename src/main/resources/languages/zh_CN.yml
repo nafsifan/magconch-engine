@@ -82,26 +82,15 @@ commands:
   showitem:
     description: "展示手中物品"
   bundle:
-    description: "给予玩家捕捉喷溅药水"
+    description: "给予玩家捕捉药水"
 
 creature-bundle:
   item:
-    potion_name: "&#d48806&l捕捉喷溅药水"
+    potion_name: "&#d48806捕捉药水"
     potion_lore:
-      - "&#8c8c8c蕴含守护与空间收纳之力的神奇药水"
-      - ""
-      - "&#52c41a› &#d9d9d9使用方式: &#fadb14投掷向目标生物"
-      - "&#8c8c8c  命中后将其转化为对应的生物蛋"
-    filled_egg_name: "&#faad14&l{entity_name}的生物蛋"
-    filled_egg_lore:
-      - "&#8c8c8c内部容纳着一只鲜活的生物"
-      - ""
-      - "&#4096ff› &#d9d9d9封存生物: &#f0f0f0{entity_name}"
-      - "&#ff4d4f› &#d9d9d9生命状态: &#ff7875❤ {health}&#8c8c8c/{max_health}"
-      - "&#faad14› &#d9d9d9生物特征: &#d9d9d9{extra_info}"
-      - ""
-      - "&#52c41a› &#d9d9d9释放方式: &#fadb14右键安全方块表面"
-  captured: "{prefix}&#52c41a已成功捕捉 &#fadb14{entity} &#52c41a并掉落为生物蛋！"
+      - "&#8c8c8c捕获命中的生物"
+    filled_egg_name: "&#faad14{entity_name}的生物蛋"
+    filled_egg_lore: []
   failed: "{prefix}&#faad14捕捉 &#f0f0f0{entity} &#faad14失败，生物挣脱了药剂束缚！"
   no_permission: "{prefix}&#ff4d4f你没有使用捕捉药水的权限。"
   spawner_denied: "{prefix}&#ff4d4f生物蛋无法用于改写刷怪笼！"
@@ -113,8 +102,8 @@ creature-bundle:
   invalid_amount: "{prefix}&#ff4d4f数量必须是有效的正整数 (1-64)。"
   given_success: >-
     {prefix}&#52c41a已给予玩家 &#f0f0f0{player}
-    &#fadb14{amount} &#52c41a瓶捕捉喷溅药水。
-  received_notice: "{prefix}&#52c41a你收到了 &#fadb14{amount} &#52c41a瓶捕捉喷溅药水。"
+    &#fadb14{amount} &#52c41a瓶捕捉药水。
+  received_notice: "{prefix}&#52c41a你收到了 &#fadb14{amount} &#52c41a瓶捕捉药水。"
 
 exp-store:
   item:

@@ -1,17 +1,12 @@
 package com.magconch.engine.modules.creaturebundle.util;
 
 import com.magconch.engine.MagconchEngine;
-import com.magconch.engine.util.TextUtil;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -41,8 +36,6 @@ public final class BundleItemUtil {
     public static final String KEY_DATA = "creature_bundle_data";
     public static final String KEY_TYPE = "creature_bundle_type";
     public static final String KEY_NAME = "creature_bundle_name";
-    public static final String KEY_HEALTH = "creature_bundle_health";
-    public static final String KEY_MAX_HEALTH = "creature_bundle_max_health";
 
     public static final String STATE_POTION = "capture_potion";
     public static final String STATE_FILLED_EGG = "filled_egg";
@@ -56,10 +49,14 @@ public final class BundleItemUtil {
     // ==========================================
 
     /**
-     * 判断物品是否为捕捉喷溅药水
+     * 判断物品是否为捕捉药水（支持滞留与喷溅瓶）
      */
     public static boolean isCapturePotion(ItemStack item, MagconchEngine plugin) {
-        if (item == null || item.getType() != Material.SPLASH_POTION) {
+        if (item == null) {
+            return false;
+        }
+        Material type = item.getType();
+        if (type != Material.LINGERING_POTION && type != Material.SPLASH_POTION) {
             return false;
         }
         ItemMeta meta = item.getItemMeta();
@@ -108,14 +105,14 @@ public final class BundleItemUtil {
     // ==========================================
 
     /**
-     * 构建一瓶崭新的「捕捉喷溅药水」
+     * 构建一瓶崭新的「捕捉药水」（滞留药水形态）
      *
      * @param plugin          插件主实例
      * @param customModelData 自定义材质模型 ID（0 则不设置）
-     * @return 捕捉喷溅药水物品
+     * @return 捕捉药水物品
      */
     public static ItemStack createCapturePotion(MagconchEngine plugin, int customModelData) {
-        ItemStack item = new ItemStack(Material.SPLASH_POTION);
+        ItemStack item = new ItemStack(Material.LINGERING_POTION);
         ItemMeta rawMeta = item.getItemMeta();
         if (rawMeta instanceof PotionMeta meta) {
             // 设置神秘深紫青色调
@@ -136,12 +133,15 @@ public final class BundleItemUtil {
             meta.setDisplayName(name);
 
             List<String> rawLore = plugin.getLanguageManager().getMessageList("creature-bundle.item.potion_lore");
-            meta.setLore(TextUtil.colorize(rawLore));
+            if (rawLore.isEmpty()) {
+                meta.setLore(null);
+            } else {
+                meta.setLore(rawLore);
+            }
 
-            // 附魔流光效果
+            // 附魔流光效果与提示清理
             meta.setEnchantmentGlintOverride(true);
-            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+            meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
 
             item.setItemMeta(meta);
         }
@@ -167,18 +167,8 @@ public final class BundleItemUtil {
             pdc.set(new NamespacedKey(plugin, KEY_DATA), PersistentDataType.STRING, snapshot.getAsString());
             pdc.set(new NamespacedKey(plugin, KEY_TYPE), PersistentDataType.STRING, entity.getType().name());
 
-            // 记录生物名称与血量
             String displayName = resolveEntityDisplayName(entity);
             pdc.set(new NamespacedKey(plugin, KEY_NAME), PersistentDataType.STRING, displayName);
-
-            double health = Math.max(0.1, entity.getHealth());
-            double maxHealth = health;
-            AttributeInstance maxHealthAttr = entity.getAttribute(Attribute.MAX_HEALTH);
-            if (maxHealthAttr != null) {
-                maxHealth = maxHealthAttr.getValue();
-            }
-            pdc.set(new NamespacedKey(plugin, KEY_HEALTH), PersistentDataType.DOUBLE, health);
-            pdc.set(new NamespacedKey(plugin, KEY_MAX_HEALTH), PersistentDataType.DOUBLE, maxHealth);
 
             if (customModelData > 0) {
                 meta.setCustomModelData(customModelData);
@@ -190,25 +180,18 @@ public final class BundleItemUtil {
 
             // 渲染 Lore 信息
             List<String> loreTemplate = plugin.getLanguageManager().getMessageList("creature-bundle.item.filled_egg_lore");
-            String extraInfo = resolveExtraInfo(entity);
-            String formattedHealth = String.format(Locale.ROOT, "%.1f", health);
-            String formattedMaxHealth = String.format(Locale.ROOT, "%.1f", maxHealth);
-
-            List<String> renderedLore = new ArrayList<>();
-            for (String line : loreTemplate) {
-                renderedLore.add(line
-                        .replace("{entity_name}", displayName)
-                        .replace("{health}", formattedHealth)
-                        .replace("{max_health}", formattedMaxHealth)
-                        .replace("{extra_info}", extraInfo)
-                );
+            if (loreTemplate.isEmpty()) {
+                meta.setLore(null);
+            } else {
+                List<String> renderedLore = new ArrayList<>();
+                for (String line : loreTemplate) {
+                    renderedLore.add(line.replace("{entity_name}", displayName));
+                }
+                meta.setLore(renderedLore);
             }
-            meta.setLore(TextUtil.colorize(renderedLore));
 
             // 附魔流光效果
             meta.setEnchantmentGlintOverride(true);
-            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
             item.setItemMeta(meta);
         }
@@ -234,17 +217,6 @@ public final class BundleItemUtil {
     public static String resolveEntityDisplayName(LivingEntity entity) {
         if (entity.getCustomName() != null && !entity.getCustomName().trim().isEmpty()) {
             return entity.getCustomName();
-        }
-        return getChineseEntityName(entity.getType());
-    }
-
-    /**
-     * 解析生物的额外特征信息（如村民职业与等级、马匹状态等）
-     */
-    public static String resolveExtraInfo(LivingEntity entity) {
-        if (entity instanceof Villager villager) {
-            String profession = getVillagerProfessionName(villager.getProfession());
-            return profession + " (等级 " + villager.getVillagerLevel() + ")";
         }
         return getChineseEntityName(entity.getType());
     }
@@ -287,33 +259,6 @@ public final class BundleItemUtil {
             case SNOW_GOLEM -> "雪傀儡";
             case IRON_GOLEM -> "铁傀儡";
             default -> type.name().toLowerCase(Locale.ROOT);
-        };
-    }
-
-    /**
-     * 村民职业中文名称映射
-     */
-    public static String getVillagerProfessionName(Villager.Profession profession) {
-        if (profession == null) {
-            return "无业";
-        }
-        String key = profession.key().value().toLowerCase(Locale.ROOT);
-        return switch (key) {
-            case "armorer" -> "盔甲匠";
-            case "butcher" -> "屠夫";
-            case "cartographer" -> "制图师";
-            case "cleric" -> "牧师";
-            case "farmer" -> "农民";
-            case "fisherman" -> "渔夫";
-            case "fletcher" -> "制箭师";
-            case "leatherworker" -> "皮匠";
-            case "librarian" -> "图书管理员";
-            case "mason" -> "石匠";
-            case "nitwit" -> "傻子";
-            case "shepherd" -> "牧羊人";
-            case "toolsmith" -> "工具匠";
-            case "weaponsmith" -> "武器匠";
-            default -> "无业";
         };
     }
 }

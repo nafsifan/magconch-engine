@@ -74,7 +74,7 @@ public class BundleSubCommand implements SubCommand {
             }
         }
 
-        // 生成捕捉喷溅药水
+        // 生成捕捉药水
         ItemStack potionItem = BundleItemUtil.createCapturePotion(plugin, config.getCustomModelData());
         potionItem.setAmount(amount);
 

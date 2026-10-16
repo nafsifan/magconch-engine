@@ -92,28 +92,15 @@ commands:
   showitem:
     description: "Show held item to everyone"
   bundle:
-    description: "Give capture splash potion to player"
+    description: "Give capture potion to player"
 
 creature-bundle:
   item:
-    potion_name: "&#d48806&lCapture Splash Potion"
+    potion_name: "&#d48806Capture Potion"
     potion_lore:
-      - "&#8c8c8cAlchemy potion infused with totem and space sealing"
-      - ""
-      - "&#52c41a› &#d9d9d9Usage: &#fadb14Throw at target creature"
-      - "&#8c8c8c  Condensed into a creature spawn egg upon impact"
-    filled_egg_name: "&#faad14&l{entity_name} Spawn Egg"
-    filled_egg_lore:
-      - "&#8c8c8cLiving essence sealed inside eggshell"
-      - ""
-      - "&#4096ff› &#d9d9d9Captured: &#f0f0f0{entity_name}"
-      - "&#ff4d4f› &#d9d9d9Health: &#ff7875❤ {health}&#8c8c8c/{max_health}"
-      - "&#faad14› &#d9d9d9Details: &#d9d9d9{extra_info}"
-      - ""
-      - "&#52c41a› &#d9d9d9Release: &#fadb14Right-Click safe block to hatch"
-  captured: >-
-    {prefix}&#52c41aCaptured &#fadb14{entity}
-    &#52c41ainto spawn egg on the ground!
+      - "&#8c8c8cCaptures hit living entities"
+    filled_egg_name: "&#faad14{entity_name}'s Spawn Egg"
+    filled_egg_lore: []
   failed: >-
     {prefix}&#faad14Failed to capture &#f0f0f0{entity}&#faad14,
     the creature broke free!
@@ -130,10 +117,10 @@ creature-bundle:
   invalid_amount: "{prefix}&#ff4d4fAmount must be positive integer (1-64)."
   given_success: >-
     {prefix}&#52c41aGiven &#f0f0f0{player}
-    &#fadb14{amount} &#52c41acapture splash potion(s).
+    &#fadb14{amount} &#52c41acapture potion(s).
   received_notice: >-
     {prefix}&#52c41aYou received &#fadb14{amount}
-    &#52c41acapture splash potion(s).
+    &#52c41acapture potion(s).
 
 exp-store:
   item:

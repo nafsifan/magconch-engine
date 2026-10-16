@@ -17,12 +17,14 @@ import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.WanderingTrader;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.entity.LingeringPotionSplashEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -32,7 +34,6 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -68,22 +69,40 @@ public class BundleInteractListener implements Listener {
     }
 
     // ==========================================
-    // 1. 喷溅药水捕捉逻辑 (原地掉落生物蛋)
+    // 1. 药水捕捉逻辑 (原地掉落生物蛋)
     // ==========================================
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPotionSplash(PotionSplashEvent event) {
-        ItemStack potionItem = event.getPotion().getItem();
-        if (!BundleItemUtil.isCapturePotion(potionItem, plugin)) {
+        ThrownPotion potion = event.getPotion();
+        if (!BundleItemUtil.isCapturePotion(potion.getItem(), plugin)) {
             return;
         }
 
-        // 默认取消药水的常规虚弱/发光效果扩散，转为纯净的封印逻辑
+        // 取消原版药水溅射扩散
         event.setCancelled(true);
+        handleCapture(potion, event.getHitEntity(), potion.getLocation());
+    }
 
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onLingeringSplash(LingeringPotionSplashEvent event) {
+        ThrownPotion potion = event.getEntity();
+        if (!BundleItemUtil.isCapturePotion(potion.getItem(), plugin)) {
+            return;
+        }
+
+        // 拦截滞留药水云生成
+        event.setCancelled(true);
+        if (event.getAreaEffectCloud() != null) {
+            event.getAreaEffectCloud().remove();
+        }
+        handleCapture(potion, event.getHitEntity(), potion.getLocation());
+    }
+
+    private void handleCapture(ThrownPotion potion, Entity hitEntity, Location splashLoc) {
         // 投掷者判定（优先玩家，无投掷玩家时按规则校验）
         Player thrower = null;
-        if (event.getPotion().getShooter() instanceof Player player) {
+        if (potion.getShooter() instanceof Player player) {
             thrower = player;
             if (!thrower.hasPermission("magconch.use.bundle")) {
                 plugin.getLanguageManager().sendMessage(thrower, "creature-bundle.no_permission");
@@ -91,18 +110,19 @@ public class BundleInteractListener implements Listener {
             }
         }
 
-        Location splashLoc = event.getPotion().getLocation();
-
-        // 寻找溅射半径内离落点最近的合法生物（单次精准捕获 1 只）
+        // 寻找命中的有效生物（优先直接命中的实体，未命中则查找落点半径 2.5 格内最近生物）
         LivingEntity captured = null;
-        double minDistanceSq = Double.MAX_VALUE;
-
-        for (LivingEntity living : event.getAffectedEntities()) {
-            if (isEligibleTarget(living, thrower)) {
-                double distSq = living.getLocation().distanceSquared(splashLoc);
-                if (distSq < minDistanceSq) {
-                    minDistanceSq = distSq;
-                    captured = living;
+        if (hitEntity instanceof LivingEntity living && isEligibleTarget(living, thrower)) {
+            captured = living;
+        } else {
+            double minDistanceSq = Double.MAX_VALUE;
+            for (LivingEntity nearby : splashLoc.getWorld().getNearbyLivingEntities(splashLoc, 2.5)) {
+                if (isEligibleTarget(nearby, thrower)) {
+                    double distSq = nearby.getLocation().distanceSquared(splashLoc);
+                    if (distSq < minDistanceSq) {
+                        minDistanceSq = distSq;
+                        captured = nearby;
+                    }
                 }
             }
         }
@@ -148,14 +168,8 @@ public class BundleInteractListener implements Listener {
         captured.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, entityLoc.clone().add(0, 0.5, 0), 20, 0.3, 0.4, 0.3, 0.1);
         captured.getWorld().spawnParticle(Particle.PORTAL, entityLoc.clone().add(0, 0.5, 0), 20, 0.3, 0.3, 0.3, 0.15);
 
-        String entityName = BundleItemUtil.resolveEntityDisplayName(captured);
-
-        // 注销原实体
+        // 注销原实体（捕获成功靠视听自明，不再聊天框刷屏）
         captured.remove();
-
-        if (thrower != null) {
-            plugin.getLanguageManager().sendMessage(thrower, "creature-bundle.captured", "{entity}", entityName);
-        }
     }
 
     // ==========================================

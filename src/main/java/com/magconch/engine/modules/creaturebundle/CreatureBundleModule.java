@@ -113,7 +113,7 @@ public class CreatureBundleModule implements EngineModule {
     // ==========================================
 
     /**
-     * 注册捕捉喷溅药水工作台合成配方
+     * 注册捕捉药水工作台合成配方
      */
     private void registerCraftingRecipe() {
         // 先清理可能存在的同键旧配方

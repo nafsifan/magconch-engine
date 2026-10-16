@@ -118,12 +118,16 @@ public class LanguageManager {
      * @return 渲染完毕的彩色文本列表
      */
     public List<String> getMessageList(String key) {
-        if (langConfig == null) {
-            return Collections.singletonList(key);
+        if (langConfig == null || !langConfig.contains(key)) {
+            return Collections.emptyList();
         }
         List<String> list = langConfig.getStringList(key);
         if (list.isEmpty()) {
-            return Collections.singletonList(getMessage(key));
+            if (langConfig.isList(key)) {
+                return Collections.emptyList();
+            }
+            String single = getMessage(key);
+            return single.isEmpty() ? Collections.emptyList() : Collections.singletonList(single);
         }
         return TextUtil.colorize(list);
     }
