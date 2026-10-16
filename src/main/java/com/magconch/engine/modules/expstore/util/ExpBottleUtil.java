@@ -1,6 +1,7 @@
 package com.magconch.engine.modules.expstore.util;
 
 import com.magconch.engine.MagconchEngine;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -92,9 +93,11 @@ public final class ExpBottleUtil {
             NamespacedKey key = new NamespacedKey(plugin, KEY_EXP_POINTS);
             meta.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, points);
 
-            // 2. 多语言显示名渲染（无 Lore 视觉杂音）
+            // 2. 多语言显示名渲染并去除客户端默认斜体
             String name = plugin.getLanguageManager().getMessage("exp-store.item.name", "{points}", String.valueOf(points));
-            meta.displayName(LegacyComponentSerializer.legacySection().deserialize(name));
+            meta.displayName(LegacyComponentSerializer.legacySection()
+                    .deserialize(name)
+                    .decoration(TextDecoration.ITALIC, false));
 
             // 3. 视觉增强：流光附魔与隐藏标记
             meta.setEnchantmentGlintOverride(true);

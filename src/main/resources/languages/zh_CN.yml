@@ -87,10 +87,9 @@ commands:
 
 creature-bundle:
   item:
-    potion_name: "&#d48806捕捉药水"
-    potion_lore:
-      - "&#8c8c8c捕获命中的生物"
-    filled_egg_name: "&#faad14{entity_name}的生物蛋"
+    potion_name: "&d&l捕捉药水"
+    potion_lore: []
+    filled_egg_name: "&b&l{entity_name}的生物蛋"
     filled_egg_lore: []
   failed: "{prefix}&#faad14捕捉 &#f0f0f0{entity} &#faad14失败，生物挣脱了药剂束缚！"
   spawner_denied: "{prefix}&#ff4d4f生物蛋无法用于改写刷怪笼！"
@@ -107,5 +106,5 @@ creature-bundle:
 
 exp-store:
   item:
-    name: "&#52c41a&l经验瓶"
+    name: "&e&l附魔之瓶"
   insufficient: "{prefix}&#ff4d4f身上的经验不足以凝聚经验瓶。"

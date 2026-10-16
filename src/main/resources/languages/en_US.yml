@@ -97,10 +97,9 @@ commands:
 
 creature-bundle:
   item:
-    potion_name: "&#d48806Capture Potion"
-    potion_lore:
-      - "&#8c8c8cCaptures hit living entities"
-    filled_egg_name: "&#faad14{entity_name}'s Spawn Egg"
+    potion_name: "&d&lCapture Potion"
+    potion_lore: []
+    filled_egg_name: "&b&l{entity_name}'s Spawn Egg"
     filled_egg_lore: []
   failed: >-
     {prefix}&#faad14Failed to capture &#f0f0f0{entity}&#faad14,
@@ -124,7 +123,7 @@ creature-bundle:
 
 exp-store:
   item:
-    name: "&#52c41a&lExperience Bottle"
+    name: "&e&lBottle o' Enchanting"
   insufficient: >-
     {prefix}&#ff4d4fNot enough experience to condense
     an experience bottle.

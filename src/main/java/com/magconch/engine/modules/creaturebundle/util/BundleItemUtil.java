@@ -3,6 +3,7 @@ package com.magconch.engine.modules.creaturebundle.util;
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.util.TextUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Color;
@@ -126,9 +127,11 @@ public final class BundleItemUtil {
             NamespacedKey stateKey = new NamespacedKey(plugin, KEY_STATE);
             meta.getPersistentDataContainer().set(stateKey, PersistentDataType.STRING, STATE_POTION);
 
-            // 从语言包渲染名称与说明
+            // 从语言包渲染名称与说明并去除客户端默认斜体
             String rawName = plugin.getLanguageManager().getMessage("creature-bundle.item.potion_name");
-            meta.displayName(LegacyComponentSerializer.legacySection().deserialize(rawName));
+            meta.displayName(LegacyComponentSerializer.legacySection()
+                    .deserialize(rawName)
+                    .decoration(TextDecoration.ITALIC, false));
 
             List<String> rawLore = plugin.getLanguageManager().getMessageList("creature-bundle.item.potion_lore");
             if (rawLore.isEmpty()) {
@@ -136,7 +139,9 @@ public final class BundleItemUtil {
             } else {
                 List<Component> loreList = new ArrayList<>(rawLore.size());
                 for (String line : rawLore) {
-                    loreList.add(LegacyComponentSerializer.legacySection().deserialize(line));
+                    loreList.add(LegacyComponentSerializer.legacySection()
+                            .deserialize(line)
+                            .decoration(TextDecoration.ITALIC, false));
                 }
                 meta.lore(loreList);
             }
@@ -172,10 +177,11 @@ public final class BundleItemUtil {
             String plainName = PlainTextComponentSerializer.plainText().serialize(entityName);
             pdc.set(new NamespacedKey(plugin, KEY_NAME), PersistentDataType.STRING, plainName);
 
-            // 渲染封存物品名称（通过 replaceText 动态替换生物名称组件，自动契合多语言翻译）
+            // 渲染封存物品名称并去除客户端默认斜体
             String titleTemplate = plugin.getLanguageManager().getRawMessage("creature-bundle.item.filled_egg_name");
             Component baseTitle = LegacyComponentSerializer.legacySection().deserialize(TextUtil.colorize(titleTemplate));
-            Component finalTitle = baseTitle.replaceText(b -> b.matchLiteral("{entity_name}").replacement(entityName));
+            Component finalTitle = baseTitle.replaceText(b -> b.matchLiteral("{entity_name}").replacement(entityName))
+                    .decoration(TextDecoration.ITALIC, false);
             meta.displayName(finalTitle);
 
             // 渲染 Lore 信息
@@ -185,7 +191,9 @@ public final class BundleItemUtil {
             } else {
                 List<Component> renderedLore = new ArrayList<>();
                 for (String line : loreTemplate) {
-                    Component baseLine = LegacyComponentSerializer.legacySection().deserialize(line);
+                    Component baseLine = LegacyComponentSerializer.legacySection()
+                            .deserialize(line)
+                            .decoration(TextDecoration.ITALIC, false);
                     renderedLore.add(baseLine.replaceText(b -> b.matchLiteral("{entity_name}").replacement(entityName)));
                 }
                 meta.lore(renderedLore);
