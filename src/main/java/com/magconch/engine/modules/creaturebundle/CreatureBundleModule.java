@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -94,8 +95,21 @@ public class CreatureBundleModule implements EngineModule {
 
     @Override
     public void onReload() {
-        onDisable();
-        onEnable();
+        boolean oldRecipeEnabled = config.isEnableRecipe();
+        List<String> oldShape = new ArrayList<>(config.getRecipeShape());
+        Map<Character, String> oldIngredients = new LinkedHashMap<>(config.getRecipeIngredients());
+
+        config.load(plugin.getConfig());
+        this.enabled = config.isEnabled();
+
+        // 仅在配方相关设置实际变动时才更新配方，杜绝无谓触碰服务端配方树和广播同步包
+        boolean recipeChanged = oldRecipeEnabled != config.isEnableRecipe()
+                || !oldShape.equals(config.getRecipeShape())
+                || !oldIngredients.equals(config.getRecipeIngredients());
+
+        if (recipeChanged) {
+            registerCraftingRecipe();
+        }
     }
 
     @Override

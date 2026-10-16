@@ -78,8 +78,8 @@ public class CompressedItemModule implements EngineModule {
 
     @Override
     public void onReload() {
-        onDisable();
-        onEnable();
+        config.load(plugin.getConfig());
+        this.enabled = config.isEnabled();
     }
 
     @Override

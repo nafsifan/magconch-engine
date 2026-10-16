@@ -81,8 +81,58 @@ public class LanguageManager {
      * 重载语言系统
      */
     public void reload() {
-        load();
+        ReloadData data = loadDataFromDisk(plugin.getConfig().getString("language", "zh_CN"));
+        applyReloadData(data);
     }
+
+    /**
+     * 从磁盘与内置资源中加载语言配置（可安全运行在异步线程）
+     *
+     * @param targetLanguage 目标语言代码 (如 zh_CN)
+     * @return 预解析的多语言数据快照
+     */
+    public ReloadData loadDataFromDisk(String targetLanguage) {
+        String lang = (targetLanguage == null || targetLanguage.isBlank()) ? "zh_CN" : targetLanguage;
+        File langFile = new File(plugin.getDataFolder(), "languages/" + lang + ".yml");
+
+        if (!langFile.exists()) {
+            plugin.getLogger().warning("未找到指定的语言文件 languages/" + lang + ".yml，正在回退至 zh_CN.yml");
+            lang = "zh_CN";
+            langFile = new File(plugin.getDataFolder(), "languages/zh_CN.yml");
+        }
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(langFile);
+
+        InputStream defStream = plugin.getResource("languages/" + lang + ".yml");
+        if (defStream != null) {
+            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream, StandardCharsets.UTF_8));
+            config.setDefaults(defConfig);
+        }
+
+        String rawPrefix = config.getString("prefix", "&8[&x&0&0&b&4&d&8Magconch&8] &7");
+        String prefix = TextUtil.colorize(rawPrefix);
+
+        return new ReloadData(lang, config, prefix);
+    }
+
+    /**
+     * 将预加载的多语言配置快照应用至运行时
+     *
+     * @param data 预解析语言数据
+     */
+    public void applyReloadData(ReloadData data) {
+        if (data == null) {
+            return;
+        }
+        this.currentLanguage = data.language();
+        this.langConfig = data.langConfig();
+        this.cachedPrefix = data.cachedPrefix();
+    }
+
+    /**
+     * 多语言配置预加载不可变快照
+     */
+    public record ReloadData(String language, FileConfiguration langConfig, String cachedPrefix) {}
 
     // ==========================================
     // 文本提取与占位符处理
