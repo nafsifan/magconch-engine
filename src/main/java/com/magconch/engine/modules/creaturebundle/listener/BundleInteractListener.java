@@ -101,6 +101,12 @@ public class BundleInteractListener implements Listener {
     }
 
     private void handleCapture(ThrownPotion potion, Entity hitEntity, Location splashLoc) {
+        // 药水接触后立即销毁，防止穿透或重复触发多次捕获
+        if (potion == null || potion.isDead()) {
+            return;
+        }
+        potion.remove();
+
         // 投掷者判定（优先玩家，无投掷玩家时按规则校验）
         Player thrower = null;
         if (potion.getShooter() instanceof Player player) {
