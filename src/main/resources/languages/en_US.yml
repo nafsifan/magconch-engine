@@ -123,7 +123,7 @@ creature-bundle:
 
 exp-store:
   item:
-    name: "&e&lBottle o' Enchanting"
+    name: "&e&lBottle of Experience"
   insufficient: >-
     {prefix}&#ff4d4fNot enough experience to condense
     an experience bottle.

@@ -106,5 +106,5 @@ creature-bundle:
 
 exp-store:
   item:
-    name: "&e&l附魔之瓶"
+    name: "&e&l经验之瓶"
   insufficient: "{prefix}&#ff4d4f身上的经验不足以凝聚经验瓶。"

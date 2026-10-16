@@ -123,8 +123,8 @@ public class ExpStoreListener implements Listener {
         // 播放附魔台声效与粒子
         Location blockLoc = block.getLocation().add(0.5, 0.8, 0.5);
         if (config.isSoundEnabled()) {
-            player.playSound(blockLoc, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 1.2f);
-            player.playSound(blockLoc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.0f);
+            player.playSound(blockLoc, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.8f, 1.0f);
+            player.playSound(blockLoc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.9f);
         }
         if (config.isParticleEnabled()) {
             block.getWorld().spawnParticle(Particle.ENCHANT, blockLoc, 40, 0.3, 0.3, 0.3, 0.8);
@@ -183,7 +183,7 @@ public class ExpStoreListener implements Listener {
 
         // 吸收音效与粒子
         if (config.isSoundEnabled()) {
-            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
+            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.9f);
         }
         if (config.isParticleEnabled()) {
             player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1.2, 0), 12, 0.3, 0.3, 0.3, 0.1);
