@@ -10,7 +10,15 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * 生物捕捉模块生命周期实现
@@ -105,12 +113,7 @@ public class CreatureBundleModule implements EngineModule {
     // ==========================================
 
     /**
-     * 注册捕捉喷溅药水工作台合成配方（炼金星芒十字阵）
-     * <pre>
-     * [ 空 ]   [ 不死图腾 ]   [ 空 ]
-     * [末影珍珠] [喷溅虚弱药水] [末影珍珠]
-     * [ 空 ]     [ 鸡蛋 ]     [ 空 ]
-     * </pre>
+     * 注册捕捉喷溅药水工作台合成配方
      */
     private void registerCraftingRecipe() {
         // 先清理可能存在的同键旧配方
@@ -120,22 +123,91 @@ public class CreatureBundleModule implements EngineModule {
             return;
         }
 
-        ItemStack potionResult = BundleItemUtil.createCapturePotion(plugin, config.getCustomModelData());
-        ShapedRecipe recipe = new ShapedRecipe(recipeKey, potionResult);
-        recipe.shape(
-                " T ",
-                "EPE",
-                " G "
-        );
-        recipe.setIngredient('T', Material.TOTEM_OF_UNDYING);
-        recipe.setIngredient('E', Material.ENDER_PEARL);
-        recipe.setIngredient('P', Material.SPLASH_POTION);
-        recipe.setIngredient('G', Material.EGG);
-
         try {
+            ItemStack potionResult = BundleItemUtil.createCapturePotion(plugin, config.getCustomModelData());
+            ShapedRecipe recipe = new ShapedRecipe(recipeKey, potionResult);
+
+            List<String> shape = config.getRecipeShape();
+            recipe.shape(shape.toArray(new String[0]));
+
+            Map<Character, String> ingredients = config.getRecipeIngredients();
+
+            for (Map.Entry<Character, String> entry : ingredients.entrySet()) {
+                char key = entry.getKey();
+                if (key == ' ' || !isCharInShape(shape, key)) {
+                    continue;
+                }
+
+                String rawVal = entry.getValue();
+                if (rawVal == null || rawVal.isBlank()) {
+                    continue;
+                }
+
+                // 单行格式解析：可能为 MATERIAL 或 MATERIAL:EFFECT
+                String[] parts = rawVal.trim().split(":", 2);
+                Material material = Material.matchMaterial(parts[0].trim());
+                if (material == null) {
+                    plugin.getLogger().warning("模块 [creature-bundle] 合成配方材料无效: " + parts[0]);
+                    continue;
+                }
+
+                // 若带有冒号指定效果（如 LINGERING_POTION:WEAKNESS），则构建精准效果匹配（自动兼顾普通版与加长版）
+                if (parts.length > 1 && isPotionMaterial(material)) {
+                    String effectName = parts[1].trim();
+                    RecipeChoice choice = buildPotionChoice(material, effectName);
+                    if (choice != null) {
+                        recipe.setIngredient(key, choice);
+                        continue;
+                    }
+                    plugin.getLogger().warning("模块 [creature-bundle] 未知或不支持的药水效果: " + effectName + "，已降级为不限效果");
+                }
+
+                recipe.setIngredient(key, material);
+            }
+
             plugin.getServer().addRecipe(recipe);
         } catch (Exception ex) {
-            plugin.getLogger().warning("[生物捕捉] 注册合成配方失败: " + ex.getMessage());
+            plugin.getLogger().warning("模块 [creature-bundle] 注册合成配方失败: " + ex.getMessage());
+        }
+    }
+
+    private boolean isCharInShape(List<String> shape, char key) {
+        for (String row : shape) {
+            if (row != null && row.indexOf(key) >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isPotionMaterial(Material material) {
+        return material == Material.LINGERING_POTION
+                || material == Material.SPLASH_POTION
+                || material == Material.POTION;
+    }
+
+    private RecipeChoice buildPotionChoice(Material material, String effectName) {
+        List<ItemStack> choices = new ArrayList<>();
+        String normalized = effectName.toUpperCase(Locale.ROOT);
+
+        addPotionVariant(choices, material, normalized);
+        if (!normalized.startsWith("LONG_")) {
+            addPotionVariant(choices, material, "LONG_" + normalized);
+        }
+
+        return choices.isEmpty() ? null : new RecipeChoice.ExactChoice(choices);
+    }
+
+    private void addPotionVariant(List<ItemStack> choices, Material material, String typeName) {
+        try {
+            PotionType type = PotionType.valueOf(typeName);
+            ItemStack item = new ItemStack(material);
+            if (item.getItemMeta() instanceof PotionMeta meta) {
+                meta.setBasePotionType(type);
+                item.setItemMeta(meta);
+                choices.add(item);
+            }
+        } catch (IllegalArgumentException ignored) {
         }
     }
 

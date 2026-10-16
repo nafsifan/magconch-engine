@@ -1,4 +1,5 @@
-# yaml-language-server: $schema=none
+# yaml-language-server: $schema=https://json.schemastore.org/bukkit-plugin.json
+---
 name: MagconchEngine
 version: '${project.version}'
 main: com.magconch.engine.MagconchEngine
@@ -73,11 +74,11 @@ permissions:
     description: 豁免传送距离经验扣费
     default: op
   magconch.use.bundle:
-    description: 允许使用生灵收纳袋收纳与释放生物
+    description: 允许使用生物捕捉道具收纳与释放生物
     default: true
   magconch.command.bundle:
-    description: 允许使用生灵收纳袋管理指令
+    description: 允许使用生物捕捉管理指令
     default: op
   magconch.bypass.bundle:
-    description: 豁免生灵袋宠物主人限制与管理特权
+    description: 豁免生物捕捉宠物主人限制与管理特权
     default: op

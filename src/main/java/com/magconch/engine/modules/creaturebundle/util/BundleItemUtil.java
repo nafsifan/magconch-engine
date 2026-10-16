@@ -88,7 +88,7 @@ public final class BundleItemUtil {
     }
 
     /**
-     * 判断物品是否为生灵模块专属的任何特殊道具
+     * 判断物品是否为生物捕捉模块专属的任何特殊道具
      */
     public static boolean isAnyModuleItem(ItemStack item, MagconchEngine plugin) {
         if (item == null) {
@@ -149,7 +149,7 @@ public final class BundleItemUtil {
     }
 
     /**
-     * 将目标生物封存入对应的原版刷怪蛋，构建单堆叠的生物蛋
+     * 将目标生物封存入对应的原版生物生成蛋，构建单堆叠的生物蛋
      *
      * @param plugin          插件实例
      * @param entity          原生物实体

@@ -24,7 +24,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
-import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -136,18 +135,18 @@ public class BundleInteractListener implements Listener {
             captured.getWorld().dropItemNaturally(entityLoc, new ItemStack(Material.LEAD, 1));
         }
 
-        // 创建实体完整快照并生成封存刷怪蛋
+        // 创建实体完整快照并生成封存生物蛋
         EntitySnapshot snapshot = captured.createSnapshot();
         ItemStack filledEgg = BundleItemUtil.createFilledEgg(plugin, captured, snapshot, config.getCustomModelData());
 
-        // 原地安全掉落封存刷怪蛋
+        // 原地安全掉落封存生物蛋
         captured.getWorld().dropItemNaturally(entityLoc, filledEgg);
 
-        // 视听反馈：雷电魔法共鸣与图腾灵魂粒子
-        captured.getWorld().playSound(entityLoc, Sound.ITEM_TOTEM_USE, 0.8f, 1.4f);
-        captured.getWorld().playSound(entityLoc, Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
-        captured.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, entityLoc.clone().add(0, 0.5, 0), 30, 0.3, 0.5, 0.3, 0.1);
-        captured.getWorld().spawnParticle(Particle.PORTAL, entityLoc.clone().add(0, 0.5, 0), 25, 0.4, 0.4, 0.4, 0.2);
+        // 视听反馈：空灵封印音与图腾收纳微光
+        captured.getWorld().playSound(entityLoc, Sound.ITEM_TOTEM_USE, 0.6f, 1.5f);
+        captured.getWorld().playSound(entityLoc, Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+        captured.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, entityLoc.clone().add(0, 0.5, 0), 20, 0.3, 0.4, 0.3, 0.1);
+        captured.getWorld().spawnParticle(Particle.PORTAL, entityLoc.clone().add(0, 0.5, 0), 20, 0.3, 0.3, 0.3, 0.15);
 
         String entityName = BundleItemUtil.resolveEntityDisplayName(captured);
 
@@ -176,7 +175,7 @@ public class BundleInteractListener implements Listener {
             return;
         }
 
-        // 一律拦截原版刷怪蛋行为（防止原版白板怪生成机制触发）
+        // 一律拦截原版生成蛋行为（防止原版白板怪生成机制触发）
         event.setCancelled(true);
 
         Block clickedBlock = event.getClickedBlock();
@@ -230,7 +229,7 @@ public class BundleInteractListener implements Listener {
         try {
             snapshot = Bukkit.getEntityFactory().createEntitySnapshot(snbt);
         } catch (Exception ex) {
-            plugin.getLogger().warning("解析封存刷怪蛋快照失败: " + ex.getMessage());
+            plugin.getLogger().warning("模块 [creature-bundle] 解析封存生物蛋快照失败: " + ex.getMessage());
             plugin.getLanguageManager().sendMessage(player, "creature-bundle.corrupted_data");
             return;
         }
@@ -255,10 +254,11 @@ public class BundleInteractListener implements Listener {
             player.getInventory().setItemInMainHand(mainHand);
         }
 
-        // 视听反馈：破壳音效与村民爱心粒子
+        // 视听反馈：破壳音效与新生微烟粒子
         spawnBlock.getWorld().playSound(spawnLoc, Sound.ENTITY_TURTLE_EGG_CRACK, 1.0f, 1.2f);
         spawnBlock.getWorld().playSound(spawnLoc, Sound.ENTITY_CHICKEN_EGG, 1.0f, 1.0f);
-        spawnBlock.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, spawnLoc.clone().add(0, 0.5, 0), 18, 0.3, 0.3, 0.3, 0.0);
+        spawnBlock.getWorld().spawnParticle(Particle.POOF, spawnLoc.clone().add(0, 0.3, 0), 8, 0.2, 0.2, 0.2, 0.05);
+        spawnBlock.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, spawnLoc.clone().add(0, 0.5, 0), 12, 0.3, 0.3, 0.3, 0.0);
     }
 
     // ==========================================
@@ -266,7 +266,7 @@ public class BundleInteractListener implements Listener {
     // ==========================================
 
     /**
-     * 防御 2: 拦截手持封存刷怪蛋右键同类成年生物触发原版幼崽繁殖
+     * 防御 2: 拦截手持封存生物蛋右键同类成年生物触发原版幼崽繁殖
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInteractEntityWithEgg(PlayerInteractEntityEvent event) {
@@ -280,7 +280,7 @@ public class BundleInteractListener implements Listener {
     }
 
     /**
-     * 防御 3: 拦截发射器发射封灵药水与封存刷怪蛋（防止绕过插件判定生成原版白板怪）
+     * 防御 3: 拦截发射器发射捕捉药水与封存生物蛋（防止绕过插件判定生成原版白板怪）
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onDispenseModuleItem(BlockDispenseEvent event) {
@@ -290,9 +290,6 @@ public class BundleInteractListener implements Listener {
         }
     }
 
-    /**
-     * 防御 4: 严禁将封灵药水或封存刷怪蛋放入工作台进行合成或洗白
-     */
     /**
      * 校验生物是否满足封印捕获条件
      */

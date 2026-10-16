@@ -56,13 +56,26 @@ modules:
     # 展示指令冷却时间（秒，0 为无冷却）
     cooldown: 3
 
-  # 生物捕捉系统（捕捉喷溅药水与封存生灵蛋）
+  # 生物捕捉系统（捕捉喷溅药水与封存生物蛋）
   creature-bundle:
     enabled: true
     # 捕捉成功基础概率 (0.0 - 1.0，1.0 为 100% 必定成功)
     capture-chance: 1.0
-    # 是否启用工作台星芒合成配方 (图腾 + 喷溅药水 + 2末影珍珠 + 鸡蛋)
-    enable-recipe: true
+    # 工作台合成配方设置
+    recipe:
+      # 是否启用合成配方
+      enabled: true
+      # 工作台九宫格摆放形状 (1-3 行，每行最多 3 个字符，空格为空位)
+      shape:
+        - " T "
+        - "EPE"
+        - " G "
+      # 原材料字符映射 (普通材料填原版材质名，药水可单行加冒号指定效果如 LINGERING_POTION:WEAKNESS)
+      ingredients:
+        T: TOTEM_OF_UNDYING
+        E: ENDER_PEARL
+        G: EGG
+        P: LINGERING_POTION:WEAKNESS
     # 自定义材质模型 ID (0 为原版默认外观)
     custom-model-data: 0
     # 额外禁止捕捉的生物类型 (可选，如需禁用村民则填入 [VILLAGER, ZOMBIE_VILLAGER])
