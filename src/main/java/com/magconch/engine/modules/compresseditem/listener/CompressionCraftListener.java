@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 /**
  * 工作台压缩与随身解压核心动态事件引擎
@@ -39,6 +40,14 @@ public class CompressionCraftListener implements Listener {
 
     private final MagconchEngine plugin;
     private final CompressedItemConfig config;
+
+    // 原版工作台与随身合成 Shift 点击的槽位装填顺序：快捷栏 8 到 0，主背包 35 到 9
+    private static final int[] VANILLA_CRAFT_SLOT_ORDER = {
+            8, 7, 6, 5, 4, 3, 2, 1, 0,
+            35, 34, 33, 32, 31, 30, 29, 28, 27,
+            26, 25, 24, 23, 22, 21, 20, 19, 18,
+            17, 16, 15, 14, 13, 12, 11, 10, 9
+    };
 
     public CompressionCraftListener(MagconchEngine plugin, CompressedItemConfig config) {
         this.plugin = plugin;
@@ -420,16 +429,43 @@ public class CompressionCraftListener implements Listener {
     private void addBatchToPlayer(Player player, ItemStack sample, int totalAmount) {
         int remaining = totalAmount;
         int maxStack = sample.getMaxStackSize();
+        PlayerInventory inv = player.getInventory();
 
-        while (remaining > 0) {
-            int toGive = Math.min(remaining, maxStack);
-            ItemStack clone = sample.clone();
-            clone.setAmount(toGive);
-            var leftovers = player.getInventory().addItem(clone);
-            for (ItemStack leftover : leftovers.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+        // 优先合并同类未满组物品
+        for (int slot : VANILLA_CRAFT_SLOT_ORDER) {
+            if (remaining <= 0) break;
+            ItemStack current = inv.getItem(slot);
+            if (current != null && current.isSimilar(sample)) {
+                int space = maxStack - current.getAmount();
+                if (space > 0) {
+                    int toAdd = Math.min(remaining, space);
+                    current.setAmount(current.getAmount() + toAdd);
+                    inv.setItem(slot, current);
+                    remaining -= toAdd;
+                }
             }
-            remaining -= toGive;
+        }
+
+        // 填充空槽位
+        for (int slot : VANILLA_CRAFT_SLOT_ORDER) {
+            if (remaining <= 0) break;
+            ItemStack current = inv.getItem(slot);
+            if (current == null || current.getType().isAir()) {
+                int toAdd = Math.min(remaining, maxStack);
+                ItemStack stack = sample.clone();
+                stack.setAmount(toAdd);
+                inv.setItem(slot, stack);
+                remaining -= toAdd;
+            }
+        }
+
+        // 溢出物安全掉落兜底
+        while (remaining > 0) {
+            int toDrop = Math.min(remaining, maxStack);
+            ItemStack drop = sample.clone();
+            drop.setAmount(toDrop);
+            player.getWorld().dropItemNaturally(player.getLocation(), drop);
+            remaining -= toDrop;
         }
     }
 
