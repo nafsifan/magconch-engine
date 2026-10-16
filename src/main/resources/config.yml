@@ -89,3 +89,9 @@ modules:
     sound-enabled: true
     # 是否生成附魔台粒子动画
     particle-enabled: true
+
+  # 高密压缩物品模块 (9合1平滑压缩与1拆9随身解压)
+  compressed-item:
+    enabled: true
+    # 禁用材质黑名单 (默认空，可填入特定材质如 TNT 禁止压缩)
+    blacklist: []
