@@ -28,13 +28,21 @@ public final class CompressedItemUtil {
     public static final String KEY_COMPRESSED_LEVEL = "compressed_level";
     private static NamespacedKey levelKey;
 
-    private static final String[] ROMAN_NUMERALS = {
-            "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ"
+    private static final String[] CAPACITY_STRINGS = {
+            "9",
+            "81",
+            "729",
+            "6,561",
+            "59,049",
+            "531,441",
+            "4,782,969",
+            "43,046,721",
+            "387,420,489"
     };
 
     private static final String[] LEVEL_COLORS = {
-            "&#36cfc9",      // 1x 冰青
-            "&#52c41a",      // 2x 翠绿
+            "&#52c41a",      // 1x 翠绿
+            "&#36cfc9",      // 2x 冰青
             "&#1677ff",      // 3x 湛蓝
             "&#722ed1",      // 4x 幽紫
             "&#fa541c",      // 5x 烈橙
@@ -112,9 +120,9 @@ public final class CompressedItemUtil {
         meta.setEnchantmentGlintOverride(true);
 
         // 3. 构建单行双拼色 Lore 并消除原版默认斜体
-        String roman = getRomanNumeral(level);
         String color = getLevelColor(level);
-        String rawLore = "&#8c8c8c◈ 压缩等级: " + color + roman;
+        String capacity = getCapacityString(level);
+        String rawLore = color + "◈ " + level + "x 压缩 &r&#8c8c8c(" + capacity + ")";
         Component loreComponent = LegacyComponentSerializer.legacySection()
                 .deserialize(TextUtil.colorize(rawLore))
                 .decoration(TextDecoration.ITALIC, false);
@@ -141,14 +149,14 @@ public final class CompressedItemUtil {
     }
 
     /**
-     * 根据层级返回对应罗马数字
+     * 根据层级返回等效方块总数的千分位格式化字符串
      */
-    public static String getRomanNumeral(int level) {
+    public static String getCapacityString(int level) {
         if (level <= 0) {
-            return "";
+            return "0";
         }
-        int index = Math.min(level, ROMAN_NUMERALS.length) - 1;
-        return ROMAN_NUMERALS[index];
+        int index = Math.min(level, CAPACITY_STRINGS.length) - 1;
+        return CAPACITY_STRINGS[index];
     }
 
     /**
