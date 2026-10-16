@@ -6,6 +6,8 @@ import com.magconch.engine.modules.trash.TrashHolder;
 import com.magconch.engine.modules.trash.TrashModule;
 import com.magconch.engine.modules.trash.config.TrashConfig;
 import com.magconch.engine.util.TextUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -106,7 +108,7 @@ public class TrashCommand implements SubCommand, CommandExecutor, TabCompleter {
         }
 
         String rawTitle = plugin.getLanguageManager().getRawMessage("trash.title");
-        String title = TextUtil.colorize(rawTitle);
+        Component title = LegacyComponentSerializer.legacySection().deserialize(TextUtil.colorize(rawTitle));
 
         Inventory trashInventory = Bukkit.createInventory(new TrashHolder(), config.getSize(), title);
         player.openInventory(trashInventory);

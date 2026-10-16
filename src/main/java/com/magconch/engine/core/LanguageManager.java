@@ -3,9 +3,12 @@ package com.magconch.engine.core;
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.util.ConfigUpdater;
 import com.magconch.engine.util.TextUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.InputStream;
@@ -13,7 +16,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * 国际化多语言管理服务
@@ -172,6 +174,22 @@ public class LanguageManager {
             return;
         }
         receiver.sendMessage(getMessage(key, placeholders));
+    }
+
+    /**
+     * 向目标玩家发送动作栏 (ActionBar) 本地化消息
+     *
+     * @param player       目标玩家
+     * @param key          语言键
+     * @param placeholders 成对占位符
+     */
+    public void sendActionBar(Player player, String key, Object... placeholders) {
+        if (player == null) {
+            return;
+        }
+        String rendered = getMessage(key, placeholders);
+        Component component = LegacyComponentSerializer.legacySection().deserialize(rendered);
+        player.sendActionBar(component);
     }
 
     // ==========================================

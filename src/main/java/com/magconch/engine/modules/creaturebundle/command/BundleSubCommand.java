@@ -4,6 +4,7 @@ import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.command.SubCommand;
 import com.magconch.engine.modules.creaturebundle.config.CreatureBundleConfig;
 import com.magconch.engine.modules.creaturebundle.util.BundleItemUtil;
+import com.magconch.engine.util.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -12,7 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 生物捕捉管理子命令 (/mcore bundle)
@@ -75,16 +75,11 @@ public class BundleSubCommand implements SubCommand {
         }
 
         // 生成捕捉药水
-        ItemStack potionItem = BundleItemUtil.createCapturePotion(plugin, config.getCustomModelData());
+        ItemStack potionItem = BundleItemUtil.createCapturePotion(plugin);
         potionItem.setAmount(amount);
 
         // 安全放入背包或掉落
-        Map<Integer, ItemStack> leftover = targetPlayer.getInventory().addItem(potionItem);
-        if (!leftover.isEmpty()) {
-            for (ItemStack drop : leftover.values()) {
-                targetPlayer.getWorld().dropItemNaturally(targetPlayer.getLocation(), drop);
-            }
-        }
+        ItemUtil.giveItemSafely(targetPlayer, potionItem);
 
         plugin.getLanguageManager().sendMessage(sender, "creature-bundle.given_success",
                 "{player}", targetPlayer.getName(),

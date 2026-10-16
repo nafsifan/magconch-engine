@@ -23,7 +23,6 @@ public class CreatureBundleConfig {
     private boolean enableRecipe = true;
     private List<String> recipeShape = List.of(" T ", "EPE", " G ");
     private final Map<Character, String> recipeIngredients = new LinkedHashMap<>();
-    private int customModelData = 0;
     private double captureChance = 1.0;
     private final Set<EntityType> allowedEntityTypes = new HashSet<>();
 
@@ -65,7 +64,6 @@ public class CreatureBundleConfig {
             this.recipeIngredients.put('P', "LINGERING_POTION:WEAKNESS");
         }
 
-        this.customModelData = config.getInt(path + "custom-model-data", 0);
         this.captureChance = Math.max(0.0, Math.min(1.0, config.getDouble(path + "capture-chance", 1.0)));
 
         // 1. 初始化内置友好/被动/功能生物白名单
@@ -114,10 +112,6 @@ public class CreatureBundleConfig {
 
     public Map<Character, String> getRecipeIngredients() {
         return Collections.unmodifiableMap(recipeIngredients);
-    }
-
-    public int getCustomModelData() {
-        return customModelData;
     }
 
     public double getCaptureChance() {

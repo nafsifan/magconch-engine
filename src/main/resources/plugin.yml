@@ -3,7 +3,7 @@
 name: MagconchEngine
 version: '${project.version}'
 main: com.magconch.engine.MagconchEngine
-api-version: '1.20'
+api-version: '1.21'
 authors: [MagconchTeam]
 description: Minecraft Server Modular Engine Core Plugin
 softdepend: [HuskHomes]

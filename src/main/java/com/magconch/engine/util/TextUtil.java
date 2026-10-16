@@ -1,7 +1,5 @@
 package com.magconch.engine.util;
 
-import net.md_5.bungee.api.ChatColor;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +9,8 @@ import java.util.regex.Pattern;
 /**
  * 文本渲染与颜色格式化工具
  * <p>
- * 提供对标准 &amp; 颜色代码以及 &#RRGGBB 十六进制 Hex 渐变色的统一转换。
+ * 提供对标准 &amp; 颜色代码以及 &#RRGGBB 十六进制 Hex 渐变色的统一转换，
+ * 采用原生字符序列构建，完全解耦废弃的 BungeeCord Chat API。
  */
 public final class TextUtil {
 
@@ -20,6 +19,7 @@ public final class TextUtil {
     // ==========================================
 
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
+    private static final Pattern COLOR_PATTERN = Pattern.compile("&([0-9a-fk-orA-FK-OR])");
 
     private TextUtil() {
         // 工具类私有构造
@@ -40,18 +40,21 @@ public final class TextUtil {
             return text;
         }
 
-        // 1. 处理 Hex 十六进制颜色代码 (&#RRGGBB)
+        // 1. 处理 Hex 十六进制颜色代码 (&#RRGGBB -> §x§r§r§g§g§b§b)
         Matcher matcher = HEX_PATTERN.matcher(text);
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         while (matcher.find()) {
-            String hexCode = matcher.group(1);
-            ChatColor color = ChatColor.of("#" + hexCode);
-            matcher.appendReplacement(buffer, color.toString());
+            String hex = matcher.group(1);
+            StringBuilder replacement = new StringBuilder("§x");
+            for (char c : hex.toCharArray()) {
+                replacement.append('§').append(Character.toLowerCase(c));
+            }
+            matcher.appendReplacement(buffer, Matcher.quoteReplacement(replacement.toString()));
         }
         matcher.appendTail(buffer);
 
-        // 2. 处理原版标准颜色字符 (&)
-        return ChatColor.translateAlternateColorCodes('&', buffer.toString());
+        // 2. 处理原版标准样式代码 (& -> §)
+        return COLOR_PATTERN.matcher(buffer.toString()).replaceAll("§$1");
     }
 
     /**

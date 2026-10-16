@@ -3,8 +3,7 @@ package com.magconch.engine.modules.undo.listener;
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.modules.undo.BlockUndoModule;
 import com.magconch.engine.modules.undo.model.PlacementRecord;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import com.magconch.engine.util.ItemUtil;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,7 +31,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 
-import java.util.Map;
 
 /**
  * 防误放撤回事件监听器
@@ -193,20 +191,14 @@ public class UndoBlockListener implements Listener {
 
         // 物品安全回流：优先进入背包，溢出则自然掉落
         Location centerLoc = clickedBlock.getLocation().add(0.5, 0.5, 0.5);
-        Map<Integer, ItemStack> overflow = player.getInventory().addItem(record.getItem());
-        if (!overflow.isEmpty()) {
-            for (ItemStack leftover : overflow.values()) {
-                clickedBlock.getWorld().dropItemNaturally(centerLoc, leftover);
-            }
-        }
+        ItemUtil.giveItemSafely(player, centerLoc, record.getItem());
 
         // 即时动效与音效反馈
         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.6f, 1.8f);
         clickedBlock.getWorld().spawnParticle(Particle.CLOUD, centerLoc, 4, 0.1, 0.1, 0.1, 0.02);
 
         // ActionBar 动作栏提示（不污染聊天栏）
-        String actionMsg = plugin.getLanguageManager().getMessage("undo.reverted");
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(actionMsg));
+        plugin.getLanguageManager().sendActionBar(player, "undo.reverted");
     }
 
     // ==========================================

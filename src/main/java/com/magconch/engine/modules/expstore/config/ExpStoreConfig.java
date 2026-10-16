@@ -17,7 +17,6 @@ public class ExpStoreConfig {
     private int pointsPerBottle = 100;
     private boolean soundEnabled = true;
     private boolean particleEnabled = true;
-    private int customModelData = 0;
 
     // ==========================================
     // 配置加载
@@ -38,7 +37,6 @@ public class ExpStoreConfig {
         this.pointsPerBottle = Math.max(1, config.getInt(path + "points-per-bottle", 100));
         this.soundEnabled = config.getBoolean(path + "sound-enabled", true);
         this.particleEnabled = config.getBoolean(path + "particle-enabled", true);
-        this.customModelData = Math.max(0, config.getInt(path + "custom-model-data", 0));
     }
 
     // ==========================================
@@ -59,9 +57,5 @@ public class ExpStoreConfig {
 
     public boolean isParticleEnabled() {
         return particleEnabled;
-    }
-
-    public int getCustomModelData() {
-        return customModelData;
     }
 }

@@ -2,7 +2,7 @@ package com.magconch.engine.modules.teleportcost.listener;
 
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.modules.teleportcost.config.TeleportCostConfig;
-import com.magconch.engine.modules.teleportcost.util.ExperienceUtil;
+import com.magconch.engine.util.ExperienceUtil;
 import com.magconch.engine.modules.teleportcost.util.TeleportCostCalculator;
 import net.william278.huskhomes.event.RandomTeleportEvent;
 import net.william278.huskhomes.event.TeleportBackEvent;

@@ -1,3 +1,4 @@
+---
 # ========================================================
 # Magconch Engine 核心配置文件
 # ========================================================
@@ -76,8 +77,6 @@ modules:
         E: ENDER_PEARL
         G: EGG
         P: LINGERING_POTION:WEAKNESS
-    # 自定义材质模型 ID (0 为原版默认外观)
-    custom-model-data: 0
     # 额外禁止捕捉的生物类型 (可选，如需禁用村民则填入 [VILLAGER, ZOMBIE_VILLAGER])
     disabled-entities: []
 
@@ -90,5 +89,3 @@ modules:
     sound-enabled: true
     # 是否生成附魔台粒子动画
     particle-enabled: true
-    # 自定义材质模型 ID (0 为原版默认外观)
-    custom-model-data: 0

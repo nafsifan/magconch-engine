@@ -124,7 +124,7 @@ public class CreatureBundleModule implements EngineModule {
         }
 
         try {
-            ItemStack potionResult = BundleItemUtil.createCapturePotion(plugin, config.getCustomModelData());
+            ItemStack potionResult = BundleItemUtil.createCapturePotion(plugin);
             ShapedRecipe recipe = new ShapedRecipe(recipeKey, potionResult);
 
             List<String> shape = config.getRecipeShape();

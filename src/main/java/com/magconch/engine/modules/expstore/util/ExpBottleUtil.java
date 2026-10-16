@@ -1,16 +1,14 @@
 package com.magconch.engine.modules.expstore.util;
 
 import com.magconch.engine.MagconchEngine;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-
-import java.util.Map;
 
 /**
  * 经验存储瓶物品构建与判别工具
@@ -82,12 +80,11 @@ public final class ExpBottleUtil {
     /**
      * 构建一个指定经验点数的标准经验瓶
      *
-     * @param plugin          插件主类实例
-     * @param points          封存的经验点数
-     * @param customModelData 自定义材质模型 ID（0 则不设置）
+     * @param plugin 插件主类实例
+     * @param points 封存的经验点数
      * @return 经验存储瓶物品
      */
-    public static ItemStack createExpBottle(MagconchEngine plugin, int points, int customModelData) {
+    public static ItemStack createExpBottle(MagconchEngine plugin, int points) {
         ItemStack item = new ItemStack(Material.EXPERIENCE_BOTTLE, 1);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -95,43 +92,16 @@ public final class ExpBottleUtil {
             NamespacedKey key = new NamespacedKey(plugin, KEY_EXP_POINTS);
             meta.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, points);
 
-            // 2. 自定义材质模型支持
-            if (customModelData > 0) {
-                meta.setCustomModelData(customModelData);
-            }
-
-            // 3. 多语言显示名渲染（无 Lore 视觉杂音）
+            // 2. 多语言显示名渲染（无 Lore 视觉杂音）
             String name = plugin.getLanguageManager().getMessage("exp-store.item.name", "{points}", String.valueOf(points));
-            meta.setDisplayName(name);
+            meta.displayName(LegacyComponentSerializer.legacySection().deserialize(name));
 
-            // 4. 视觉增强：流光附魔与隐藏标记
+            // 3. 视觉增强：流光附魔与隐藏标记
             meta.setEnchantmentGlintOverride(true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
 
             item.setItemMeta(meta);
         }
         return item;
-    }
-
-    // ==========================================
-    // 安全发物机制
-    // ==========================================
-
-    /**
-     * 安全将物品给予玩家，背包溢出时自动平滑掉落在脚下，杜绝吞物漏洞
-     *
-     * @param player 目标玩家
-     * @param item   给予的物品
-     */
-    public static void giveItemSafely(Player player, ItemStack item) {
-        if (player == null || item == null || item.getAmount() <= 0) {
-            return;
-        }
-        Map<Integer, ItemStack> overflow = player.getInventory().addItem(item);
-        if (!overflow.isEmpty()) {
-            for (ItemStack drop : overflow.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), drop);
-            }
-        }
     }
 }

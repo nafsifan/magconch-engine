@@ -1,3 +1,4 @@
+---
 # ========================================================
 # Magconch Engine 语言文本包 (简体中文 - zh_CN)
 # ========================================================
@@ -92,7 +93,6 @@ creature-bundle:
     filled_egg_name: "&#faad14{entity_name}的生物蛋"
     filled_egg_lore: []
   failed: "{prefix}&#faad14捕捉 &#f0f0f0{entity} &#faad14失败，生物挣脱了药剂束缚！"
-  no_permission: "{prefix}&#ff4d4f你没有使用捕捉药水的权限。"
   spawner_denied: "{prefix}&#ff4d4f生物蛋无法用于改写刷怪笼！"
   dangerous_location: "{prefix}&#ff4d4f目标位置极其危险或空间受限，无法释放！"
   no_space: "{prefix}&#ff4d4f目标方块空间不足，无法安全释放生物！"
@@ -109,4 +109,3 @@ exp-store:
   item:
     name: "&#52c41a&l经验瓶"
   insufficient: "{prefix}&#ff4d4f身上的经验不足以凝聚经验瓶。"
-  no_permission: "{prefix}&#ff4d4f你没有使用经验封存功能的权限。"

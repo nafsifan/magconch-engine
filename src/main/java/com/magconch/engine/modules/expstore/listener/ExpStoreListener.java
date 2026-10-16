@@ -3,7 +3,8 @@ package com.magconch.engine.modules.expstore.listener;
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.modules.expstore.config.ExpStoreConfig;
 import com.magconch.engine.modules.expstore.util.ExpBottleUtil;
-import com.magconch.engine.modules.teleportcost.util.ExperienceUtil;
+import com.magconch.engine.util.ExperienceUtil;
+import com.magconch.engine.util.ItemUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -54,7 +55,7 @@ public class ExpStoreListener implements Listener {
 
         // 1. 优先判定附魔台潜行萃取经验（严格尊重外部领地防破坏保护）
         if (action == Action.RIGHT_CLICK_BLOCK && player.isSneaking()) {
-            if (event.useInteractedBlock() == org.bukkit.event.Event.Result.DENY || event.isCancelled()) {
+            if (event.useInteractedBlock() == org.bukkit.event.Event.Result.DENY) {
                 return;
             }
             Block block = event.getClickedBlock();
@@ -91,7 +92,7 @@ public class ExpStoreListener implements Listener {
 
         // 权限校验
         if (!player.hasPermission("magconch.expstore.use")) {
-            plugin.getLanguageManager().sendMessage(player, "exp-store.no_permission");
+            plugin.getLanguageManager().sendMessage(player, "general.no_permission");
             return true;
         }
 
@@ -116,8 +117,8 @@ public class ExpStoreListener implements Listener {
         ExperienceUtil.setTotalExperience(player, totalExp - points);
 
         // 构建标准经验瓶并安全发包
-        ItemStack expBottle = ExpBottleUtil.createExpBottle(plugin, points, config.getCustomModelData());
-        ExpBottleUtil.giveItemSafely(player, expBottle);
+        ItemStack expBottle = ExpBottleUtil.createExpBottle(plugin, points);
+        ItemUtil.giveItemSafely(player, expBottle);
 
         // 播放附魔台声效与粒子
         Location blockLoc = block.getLocation().add(0.5, 0.8, 0.5);
@@ -160,7 +161,7 @@ public class ExpStoreListener implements Listener {
         event.setCancelled(true);
 
         if (!player.hasPermission("magconch.expstore.use")) {
-            plugin.getLanguageManager().sendMessage(player, "exp-store.no_permission");
+            plugin.getLanguageManager().sendMessage(player, "general.no_permission");
             return;
         }
 
@@ -178,7 +179,7 @@ public class ExpStoreListener implements Listener {
         ExperienceUtil.setTotalExperience(player, finalExp);
 
         // 返还 1 个空玻璃瓶
-        ExpBottleUtil.giveItemSafely(player, new ItemStack(Material.GLASS_BOTTLE, 1));
+        ItemUtil.giveItemSafely(player, new ItemStack(Material.GLASS_BOTTLE, 1));
 
         // 吸收音效与粒子
         if (config.isSoundEnabled()) {

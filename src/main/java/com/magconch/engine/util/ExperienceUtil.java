@@ -1,4 +1,4 @@
-package com.magconch.engine.modules.teleportcost.util;
+package com.magconch.engine.util;
 
 import org.bukkit.entity.Player;
 

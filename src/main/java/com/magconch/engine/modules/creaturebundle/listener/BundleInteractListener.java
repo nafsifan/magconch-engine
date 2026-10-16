@@ -3,6 +3,7 @@ package com.magconch.engine.modules.creaturebundle.listener;
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.modules.creaturebundle.config.CreatureBundleConfig;
 import com.magconch.engine.modules.creaturebundle.util.BundleItemUtil;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -105,7 +106,7 @@ public class BundleInteractListener implements Listener {
         if (potion.getShooter() instanceof Player player) {
             thrower = player;
             if (!thrower.hasPermission("magconch.use.bundle")) {
-                plugin.getLanguageManager().sendMessage(thrower, "creature-bundle.no_permission");
+                plugin.getLanguageManager().sendMessage(thrower, "general.no_permission");
                 return;
             }
         }
@@ -143,7 +144,7 @@ public class BundleInteractListener implements Listener {
             entityLoc.getWorld().playSound(entityLoc, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.2f);
             entityLoc.getWorld().spawnParticle(Particle.SMOKE, entityLoc.clone().add(0, 0.5, 0), 25, 0.3, 0.3, 0.3, 0.05);
             if (thrower != null) {
-                String targetName = BundleItemUtil.resolveEntityDisplayName(captured);
+                String targetName = PlainTextComponentSerializer.plainText().serialize(BundleItemUtil.resolveEntityDisplayName(captured));
                 plugin.getLanguageManager().sendMessage(thrower, "creature-bundle.failed", "{entity}", targetName);
             }
             return;
@@ -157,7 +158,7 @@ public class BundleInteractListener implements Listener {
 
         // 创建实体完整快照并生成封存生物蛋
         EntitySnapshot snapshot = captured.createSnapshot();
-        ItemStack filledEgg = BundleItemUtil.createFilledEgg(plugin, captured, snapshot, config.getCustomModelData());
+        ItemStack filledEgg = BundleItemUtil.createFilledEgg(plugin, captured, snapshot);
 
         // 原地安全掉落封存生物蛋
         captured.getWorld().dropItemNaturally(entityLoc, filledEgg);
@@ -205,7 +206,7 @@ public class BundleInteractListener implements Listener {
 
         // 权限校验
         if (!player.hasPermission("magconch.use.bundle")) {
-            plugin.getLanguageManager().sendMessage(player, "creature-bundle.no_permission");
+            plugin.getLanguageManager().sendMessage(player, "general.no_permission");
             return;
         }
 

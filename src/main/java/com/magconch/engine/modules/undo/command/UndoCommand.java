@@ -57,6 +57,11 @@ public class UndoCommand implements SubCommand {
             return true;
         }
 
+        if (!player.hasPermission("magconch.use.undo")) {
+            plugin.getLanguageManager().sendMessage(player, "general.no_permission");
+            return true;
+        }
+
         // 无参或 toggle 均触发切换
         boolean currentActive = module.isUndoEnabledFor(player);
         boolean nextActive = !currentActive;
