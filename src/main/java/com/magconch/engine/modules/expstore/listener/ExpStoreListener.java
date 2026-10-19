@@ -11,6 +11,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,6 +21,8 @@ import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * 经验存储交互事件监听器
@@ -172,11 +175,19 @@ public class ExpStoreListener implements Listener {
         // 消耗 1 个经验瓶
         consumeOneItem(player, slot, targetItem);
 
-        // 增加玩家总经验
-        int currentExp = ExperienceUtil.getTotalExperience(player);
-        long targetExp = (long) currentExp + points;
-        int finalExp = (int) Math.min(Integer.MAX_VALUE, targetExp);
-        ExperienceUtil.setTotalExperience(player, finalExp);
+        // 若启用经验修补，优先按原版比例顺次修补另一只手及护甲
+        int remainingPoints = points;
+        if (config.isMendingRepairEnabled()) {
+            remainingPoints = repairEquipments(player, isMainHand, points);
+        }
+
+        // 剩余点数注入玩家经验条
+        if (remainingPoints > 0) {
+            int currentExp = ExperienceUtil.getTotalExperience(player);
+            long targetExp = (long) currentExp + remainingPoints;
+            int finalExp = (int) Math.min(Integer.MAX_VALUE, targetExp);
+            ExperienceUtil.setTotalExperience(player, finalExp);
+        }
 
         // 返还 1 个空玻璃瓶
         ItemUtil.giveItemSafely(player, new ItemStack(Material.GLASS_BOTTLE, 1));
@@ -191,8 +202,80 @@ public class ExpStoreListener implements Listener {
     }
 
     // ==========================================
-    // 物品消耗工具方法
+    // 装备修补与物品消耗工具方法
     // ==========================================
+
+    /**
+     * 自动顺次修补玩家身上破损的经验修补装备
+     *
+     * @param player           目标玩家
+     * @param bottleInMainHand 经验瓶是否在主手
+     * @param points           封存的总经验点数
+     * @return 修补消耗后结余的经验点数
+     */
+    private int repairEquipments(Player player, boolean bottleInMainHand, int points) {
+        if (points <= 0) {
+            return 0;
+        }
+
+        // 顺次修补判定队列：另一只手手持装备 -> 头部 -> 胸部 -> 腿部 -> 脚部
+        EquipmentSlot otherHandSlot = bottleInMainHand ? EquipmentSlot.OFF_HAND : EquipmentSlot.HAND;
+        EquipmentSlot[] slots = {
+                otherHandSlot,
+                EquipmentSlot.HEAD,
+                EquipmentSlot.CHEST,
+                EquipmentSlot.LEGS,
+                EquipmentSlot.FEET
+        };
+
+        int remaining = points;
+        for (EquipmentSlot slot : slots) {
+            if (remaining <= 0) {
+                break;
+            }
+
+            ItemStack item = player.getInventory().getItem(slot);
+            if (item == null || item.getType().isAir()) {
+                continue;
+            }
+
+            // 必须拥有经验修补附魔
+            if (item.getEnchantmentLevel(Enchantment.MENDING) <= 0) {
+                continue;
+            }
+
+            ItemMeta meta = item.getItemMeta();
+            if (!(meta instanceof Damageable damageable)) {
+                continue;
+            }
+
+            // 过滤不可破坏标记与无损耗物品
+            if (damageable.isUnbreakable() || !damageable.hasDamage() || damageable.getDamage() <= 0) {
+                continue;
+            }
+
+            int currentDamage = damageable.getDamage();
+            // 原版经验修补换算：1 经验点数 = 2 耐久（不足 2 耐久按 1 经验向上取整）
+            int neededExp = (currentDamage + 1) / 2;
+
+            if (remaining >= neededExp) {
+                // 完全修复当前装备
+                damageable.setDamage(0);
+                item.setItemMeta(meta);
+                player.getInventory().setItem(slot, item);
+                remaining -= neededExp;
+            } else {
+                // 消耗所有剩余经验进行部分修复
+                int repairAmount = remaining * 2;
+                damageable.setDamage(Math.max(0, currentDamage - repairAmount));
+                item.setItemMeta(meta);
+                player.getInventory().setItem(slot, item);
+                remaining = 0;
+            }
+        }
+
+        return remaining;
+    }
 
     /**
      * 安全扣除玩家主手或副手的单个手持物品

@@ -135,6 +135,8 @@ modules:
     sound-enabled: true
     # 是否生成附魔台粒子动画
     particle-enabled: true
+    # 是否在吸收时优先自动修补身上与另一只手持有的破损经验修补装备（1经验点数=2耐久）
+    mending-repair: true
 
   # 高密压缩物品模块 (9合1平滑压缩与1拆9随身解压)
   compressed-item:
