@@ -127,3 +127,10 @@ exp-store:
   insufficient: >-
     {prefix}&#ff4d4fNot enough experience to condense
     an experience bottle.
+
+mentions:
+  hover_player: "&#d9d9d9Click to message &#f0f0f0{player}"
+  hover_everyone: "&#d9d9d9Broadcast to everyone"
+  cooldown: >-
+    {prefix}&#ff4d4f@ too frequently, please wait
+    &#fadb14{seconds}s &#ff4d4fbefore mentioning again.

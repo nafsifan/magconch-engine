@@ -50,6 +50,9 @@ permissions:
       magconch.harvester.use: true
       magconch.signedit.use: true
       magconch.signedit.color: true
+      magconch.mentions.use: true
+      magconch.mentions.everyone: true
+      magconch.mentions.bypass: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -98,3 +101,12 @@ permissions:
   magconch.signedit.color:
     description: 允许在告示牌上使用 & 颜色代码与十六进制色
     default: true
+  magconch.mentions.use:
+    description: 允许在聊天中使用 @ 提及在线玩家
+    default: true
+  magconch.mentions.everyone:
+    description: 允许在聊天中使用 @everyone 提及全服玩家
+    default: op
+  magconch.mentions.bypass:
+    description: 豁免聊天艾特提及的冷却时间
+    default: op

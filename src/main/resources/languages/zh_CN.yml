@@ -108,3 +108,8 @@ exp-store:
   item:
     name: "&e&l经验之瓶"
   insufficient: "{prefix}&#ff4d4f身上的经验不足以凝聚经验瓶。"
+
+mentions:
+  hover_player: "&#d9d9d9点击快速与 &#f0f0f0{player} &#d9d9d9发起私聊"
+  hover_everyone: "&#d9d9d9全体通知消息"
+  cooldown: "{prefix}&#ff4d4f@ 过于频繁，请等待 &#fadb14{seconds} &#ff4d4f秒。"
