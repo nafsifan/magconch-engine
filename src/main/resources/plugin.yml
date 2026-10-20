@@ -47,6 +47,7 @@ permissions:
       magconch.command.bundle: true
       magconch.bypass.bundle: true
       magconch.expstore.use: true
+      magconch.harvester.use: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -85,4 +86,7 @@ permissions:
     default: op
   magconch.expstore.use:
     description: 允许使用附魔台灌装和使用经验瓶
+    default: true
+  magconch.harvester.use:
+    description: 允许使用右键快速收菜与自动补种功能
     default: true

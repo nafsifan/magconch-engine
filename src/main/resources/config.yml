@@ -143,3 +143,7 @@ modules:
     enabled: true
     # 禁用材质黑名单 (默认空，可填入特定材质如 TNT 禁止压缩)
     blacklist: []
+
+  # 快速收菜模块 (右键成熟农作物即收即种)
+  harvester:
+    enabled: true
