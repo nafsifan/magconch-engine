@@ -48,8 +48,7 @@ permissions:
       magconch.bypass.bundle: true
       magconch.expstore.use: true
       magconch.harvester.use: true
-      magconch.signedit.use: true
-      magconch.signedit.color: true
+      magconch.signcolor.use: true
       magconch.mentions.use: true
       magconch.mentions.everyone: true
       magconch.mentions.bypass: true
@@ -95,11 +94,8 @@ permissions:
   magconch.harvester.use:
     description: 允许使用右键快速收菜与自动补种功能
     default: true
-  magconch.signedit.use:
-    description: 允许潜行右键重新编辑已放置的告示牌
-    default: true
-  magconch.signedit.color:
-    description: 允许在告示牌上使用 & 颜色代码与十六进制色
+  magconch.signcolor.use:
+    description: 允许在告示牌上使用彩色文字
     default: true
   magconch.mentions.use:
     description: 允许在聊天中使用 @ 提及在线玩家

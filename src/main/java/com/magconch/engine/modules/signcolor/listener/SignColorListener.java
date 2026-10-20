@@ -1,11 +1,12 @@
-package com.magconch.engine.modules.signedit.listener;
+package com.magconch.engine.modules.signcolor.listener;
 
 import com.magconch.engine.MagconchEngine;
-import com.magconch.engine.modules.signedit.config.SignEditConfig;
+import com.magconch.engine.modules.signcolor.config.SignColorConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -24,14 +25,13 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * 告示牌无损速改与颜色解析监听器
+ * 告示牌彩色文字解析与无损还原监听器
  * <p>
- * 监听潜行右键告示牌唤起原版编辑界面，并支持在编辑与提交文本时双向保留 & 颜色与十六进制色。
+ * 支持在告示牌上解析 & 颜色代码与十六进制色，并在二次编辑时无损还原源码。
  */
-public class SignEditListener implements Listener {
+public class SignColorListener implements Listener {
 
-    private static final String PERMISSION_USE = "magconch.signedit.use";
-    private static final String PERMISSION_COLOR = "magconch.signedit.color";
+    private static final String PERMISSION_USE = "magconch.signcolor.use";
 
     private static final LegacyComponentSerializer COLOR_SERIALIZER = LegacyComponentSerializer.builder()
             .character('&')
@@ -39,15 +39,15 @@ public class SignEditListener implements Listener {
             .build();
 
     private final MagconchEngine plugin;
-    private final SignEditConfig config;
+    private final SignColorConfig config;
 
-    public SignEditListener(MagconchEngine plugin, SignEditConfig config) {
+    public SignColorListener(MagconchEngine plugin, SignColorConfig config) {
         this.plugin = plugin;
         this.config = config;
     }
 
     // ==========================================
-    // 潜行右键唤起重新编辑
+    // 右键唤起编辑时无损还原颜色代码
     // ==========================================
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -66,23 +66,12 @@ public class SignEditListener implements Listener {
             return;
         }
 
-        // 2. 仅当潜行时触发速改功能
-        if (!player.isSneaking()) {
-            return;
-        }
-
-        // 3. 潜行且主手持可放置方块时让路（遵循原版交互准则：Shift 优先放置方块/插火把）
-        ItemStack handItem = player.getInventory().getItemInMainHand();
-        if (handItem.getType().isBlock()) {
-            return;
-        }
-
-        // 4. 权限校验
+        // 2. 权限校验：拥有颜色权限才介入颜色无损还原，无权限完全走原版流程
         if (!player.hasPermission(PERMISSION_USE)) {
             return;
         }
 
-        // 5. 目标方块校验
+        // 3. 目标方块校验
         Block block = event.getClickedBlock();
         if (block == null) {
             return;
@@ -90,6 +79,25 @@ public class SignEditListener implements Listener {
 
         BlockState state = block.getState();
         if (!(state instanceof Sign sign)) {
+            return;
+        }
+
+        // 4. 已打蜡封死的告示牌遵循原版规则禁止编辑
+        if (sign.isWaxed()) {
+            return;
+        }
+
+        // 5. 原版交互让路处理
+        ItemStack handItem = player.getInventory().getItemInMainHand();
+        Material handType = handItem.getType();
+
+        // 潜行手持方块优先放置方块/插火把
+        if (player.isSneaking() && handType.isBlock()) {
+            return;
+        }
+
+        // 手持染料、蜜脾、发光墨囊等原版道具时让路
+        if (isSignModifierItem(handType)) {
             return;
         }
 
@@ -128,6 +136,13 @@ public class SignEditListener implements Listener {
         player.openSign(sign, side);
     }
 
+    private boolean isSignModifierItem(Material type) {
+        if (type == Material.HONEYCOMB || type == Material.GLOW_INK_SAC || type == Material.INK_SAC) {
+            return true;
+        }
+        return type.name().endsWith("_DYE");
+    }
+
     // ==========================================
     // 告示牌文本提交与颜色解析
     // ==========================================
@@ -139,7 +154,7 @@ public class SignEditListener implements Listener {
         }
 
         Player player = event.getPlayer();
-        if (!player.hasPermission(PERMISSION_COLOR)) {
+        if (!player.hasPermission(PERMISSION_USE)) {
             return;
         }
 

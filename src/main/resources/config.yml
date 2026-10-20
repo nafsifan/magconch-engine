@@ -148,8 +148,8 @@ modules:
   harvester:
     enabled: true
 
-  # 告示牌无损速改与颜色解析模块
-  signedit:
+  # 告示牌彩色与十六进制色支持模块
+  signcolor:
     enabled: true
 
   # 聊天提及艾特系统 (支持 @玩家、@everyone 与控制台广播)
