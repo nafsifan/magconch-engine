@@ -48,6 +48,8 @@ permissions:
       magconch.bypass.bundle: true
       magconch.expstore.use: true
       magconch.harvester.use: true
+      magconch.signedit.use: true
+      magconch.signedit.color: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -89,4 +91,10 @@ permissions:
     default: true
   magconch.harvester.use:
     description: 允许使用右键快速收菜与自动补种功能
+    default: true
+  magconch.signedit.use:
+    description: 允许潜行右键重新编辑已放置的告示牌
+    default: true
+  magconch.signedit.color:
+    description: 允许在告示牌上使用 & 颜色代码与十六进制色
     default: true

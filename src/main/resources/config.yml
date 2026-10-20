@@ -147,3 +147,7 @@ modules:
   # 快速收菜模块 (右键成熟农作物即收即种)
   harvester:
     enabled: true
+
+  # 告示牌无损速改与颜色解析模块
+  signedit:
+    enabled: true
