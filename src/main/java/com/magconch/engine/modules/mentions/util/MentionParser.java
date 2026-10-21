@@ -130,6 +130,10 @@ public class MentionParser {
                 // 2.2 检查单个在线玩家提及
                 Player target = findOnlinePlayer(targetName);
                 if (target != null) {
+                    if (sender instanceof Player player && player.getUniqueId().equals(target.getUniqueId())) {
+                        return textBuilder.content(fullMatch);
+                    }
+
                     targets.add(target);
                     String hoverTemplate = plugin.getLanguageManager().getMessage("mentions.hover_player", "{player}", target.getName());
                     Component hoverComponent = LegacyComponentSerializer.legacySection().deserialize(hoverTemplate);

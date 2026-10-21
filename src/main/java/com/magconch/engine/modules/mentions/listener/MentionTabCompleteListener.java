@@ -43,10 +43,12 @@ public class MentionTabCompleteListener implements Listener {
 
         Player joinedPlayer = event.getPlayer();
 
-        // 1. 为新进服玩家构建全量补全列表
+        // 1. 为新进服玩家构建全量补全列表 (剔除自身)
         List<String> completionsForJoined = new ArrayList<>();
         for (Player online : Bukkit.getOnlinePlayers()) {
-            completionsForJoined.add("@" + online.getName());
+            if (!online.getUniqueId().equals(joinedPlayer.getUniqueId())) {
+                completionsForJoined.add("@" + online.getName());
+            }
         }
         if (joinedPlayer.hasPermission("magconch.mentions.everyone")) {
             completionsForJoined.add("@everyone");
@@ -108,6 +110,9 @@ public class MentionTabCompleteListener implements Listener {
         List<String> suggestions = new ArrayList<>();
 
         for (Player online : Bukkit.getOnlinePlayers()) {
+            if (event.getSender() instanceof Player p && p.getUniqueId().equals(online.getUniqueId())) {
+                continue;
+            }
             if (online.getName().toLowerCase().startsWith(searchPrefix)) {
                 suggestions.add("@" + online.getName());
             }
@@ -144,13 +149,13 @@ public class MentionTabCompleteListener implements Listener {
             return;
         }
 
-        List<String> basePlayerNames = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            basePlayerNames.add("@" + player.getName());
-        }
-
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            List<String> playerSpecificList = new ArrayList<>(basePlayerNames);
+            List<String> playerSpecificList = new ArrayList<>();
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                if (!online.getUniqueId().equals(player.getUniqueId())) {
+                    playerSpecificList.add("@" + online.getName());
+                }
+            }
             if (player.hasPermission("magconch.mentions.everyone")) {
                 playerSpecificList.add("@everyone");
                 playerSpecificList.add("@all");
