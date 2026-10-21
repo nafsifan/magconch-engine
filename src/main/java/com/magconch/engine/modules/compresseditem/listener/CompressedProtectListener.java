@@ -38,7 +38,16 @@ public class CompressedProtectListener implements Listener {
             InventoryType.STONECUTTER,
             InventoryType.FURNACE,
             InventoryType.BLAST_FURNACE,
-            InventoryType.SMOKER
+            InventoryType.SMOKER,
+            InventoryType.GRINDSTONE,
+            InventoryType.BEACON,
+            InventoryType.CARTOGRAPHY,
+            InventoryType.SMITHING,
+            InventoryType.ANVIL,
+            InventoryType.BREWING,
+            InventoryType.ENCHANTING,
+            InventoryType.LOOM,
+            InventoryType.CRAFTER
     );
 
     private final MagconchEngine plugin;
@@ -150,8 +159,8 @@ public class CompressedProtectListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onCrafterCraft(CrafterCraftEvent event) {
-        // 合成器触发时若内部网格含有压缩方块，直接取消合成，防止被自动化装置误毁
-        if (event.getBlock().getState() instanceof org.bukkit.block.Crafter crafter) {
+        // 合成器触发时若内部网格含有压缩方块，直接取消合成，使用轻量快照避免高频开销
+        if (event.getBlock().getState(false) instanceof org.bukkit.block.Crafter crafter) {
             for (ItemStack item : crafter.getInventory().getContents()) {
                 if (CompressedItemUtil.isCompressed(item, plugin)) {
                     event.setCancelled(true);
@@ -162,23 +171,27 @@ public class CompressedProtectListener implements Listener {
     }
 
     // ==========================================
-    // 堆肥桶右键防误吞拦截 (静默取消)
+    // 堆肥桶/营火/点唱机右键防误吞拦截 (静默取消)
     // ==========================================
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onInteractComposter(PlayerInteractEvent event) {
+    public void onInteractSpecialBlock(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
 
         Block block = event.getClickedBlock();
-        if (block == null || block.getType() != Material.COMPOSTER) {
+        if (block == null) {
             return;
         }
 
-        ItemStack item = event.getItem();
-        if (CompressedItemUtil.isCompressed(item, plugin)) {
-            event.setCancelled(true);
+        Material blockType = block.getType();
+        if (blockType == Material.COMPOSTER || blockType == Material.CAMPFIRE
+                || blockType == Material.SOUL_CAMPFIRE || blockType == Material.JUKEBOX) {
+            ItemStack item = event.getItem();
+            if (CompressedItemUtil.isCompressed(item, plugin)) {
+                event.setCancelled(true);
+            }
         }
     }
 }

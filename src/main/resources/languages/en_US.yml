@@ -134,3 +134,6 @@ mentions:
   cooldown: >-
     {prefix}&#ff4d4f@ too frequently, please wait
     &#fadb14{seconds}s &#ff4d4fbefore mentioning again.
+
+compressed-item:
+  lore_format: "{color}◈ {level}x Compressed &r&#8c8c8c({capacity})"

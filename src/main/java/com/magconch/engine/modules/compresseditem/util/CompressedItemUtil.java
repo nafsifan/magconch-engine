@@ -122,7 +122,15 @@ public final class CompressedItemUtil {
         // 3. 构建单行双拼色 Lore 并消除原版默认斜体
         String color = getLevelColor(level);
         String capacity = getCapacityString(level);
-        String rawLore = color + "◈ " + level + "x 压缩 &r&#8c8c8c(" + capacity + ")";
+        String rawLore;
+        if (plugin != null && plugin.getLanguageManager() != null) {
+            rawLore = plugin.getLanguageManager().getMessage("compressed-item.lore_format",
+                    "{color}", color,
+                    "{level}", String.valueOf(level),
+                    "{capacity}", capacity);
+        } else {
+            rawLore = color + "◈ " + level + "x 压缩 &r&#8c8c8c(" + capacity + ")";
+        }
         Component loreComponent = LegacyComponentSerializer.legacySection()
                 .deserialize(TextUtil.colorize(rawLore))
                 .decoration(TextDecoration.ITALIC, false);

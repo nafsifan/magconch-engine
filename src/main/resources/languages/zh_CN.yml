@@ -113,3 +113,6 @@ mentions:
   hover_player: "&#d9d9d9点击快速与 &#f0f0f0{player} &#d9d9d9发起私聊"
   hover_everyone: "&#d9d9d9全体通知消息"
   cooldown: "{prefix}&#ff4d4f@ 过于频繁，请等待 &#fadb14{seconds} &#ff4d4f秒。"
+
+compressed-item:
+  lore_format: "{color}◈ {level}x 压缩 &r&#8c8c8c({capacity})"

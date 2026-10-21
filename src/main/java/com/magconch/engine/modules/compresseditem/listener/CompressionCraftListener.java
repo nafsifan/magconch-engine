@@ -3,7 +3,9 @@ package com.magconch.engine.modules.compresseditem.listener;
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.modules.compresseditem.config.CompressedItemConfig;
 import com.magconch.engine.modules.compresseditem.util.CompressedItemUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,6 +17,7 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.Recipe;
 
 /**
  * 工作台压缩与随身解压核心动态事件引擎
@@ -61,7 +64,8 @@ public class CompressionCraftListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPrepareCraft(PrepareItemCraftEvent event) {
         CraftingInventory inv = event.getInventory();
-        CraftEvaluation eval = evaluate(inv.getMatrix());
+        World world = event.getView().getPlayer().getWorld();
+        CraftEvaluation eval = evaluate(inv.getMatrix(), world);
         if (eval != null) {
             inv.setResult(eval.result());
         }
@@ -83,7 +87,7 @@ public class CompressionCraftListener implements Listener {
             return;
         }
 
-        CraftEvaluation eval = evaluate(inv.getMatrix());
+        CraftEvaluation eval = evaluate(inv.getMatrix(), player.getWorld());
         if (eval == null || eval.mode() == CraftMode.NONE || eval.result() == null) {
             return;
         }
@@ -323,10 +327,10 @@ public class CompressionCraftListener implements Listener {
     }
 
     // ==========================================
-    // 核心配方计算 (单点真实源)
+    // 核心配方计算 (单点真实源与原版动态避让)
     // ==========================================
 
-    private CraftEvaluation evaluate(ItemStack[] matrix) {
+    private CraftEvaluation evaluate(ItemStack[] matrix, World world) {
         int nonEmpty = 0;
         ItemStack singleItem = null;
         boolean hasCompressed = false;
@@ -348,6 +352,18 @@ public class CompressionCraftListener implements Listener {
             ItemStack first = matrix[0];
             Material mat = first.getType();
             int baseLevel = CompressedItemUtil.getCompressedLevel(first, plugin);
+
+            // 若为 0 级未压缩原料，检测原版或第三方是否有 3x3 转化配方，优先避让放行原版
+            if (baseLevel == 0 && world != null) {
+                try {
+                    Recipe existingRecipe = Bukkit.getCraftingRecipe(matrix, world);
+                    if (existingRecipe != null) {
+                        return null;
+                    }
+                } catch (Exception ignored) {
+                    // 防御部分极端上下文下的检测异常
+                }
+            }
 
             if (config.isCompressible(mat) && baseLevel < config.getMaxLevel()) {
                 boolean allMatch = true;
@@ -378,7 +394,8 @@ public class CompressionCraftListener implements Listener {
     }
 
     private void refreshCraftResult(CraftingInventory inv) {
-        CraftEvaluation eval = evaluate(inv.getMatrix());
+        World world = inv.getViewers().isEmpty() ? null : inv.getViewers().get(0).getWorld();
+        CraftEvaluation eval = evaluate(inv.getMatrix(), world);
         inv.setResult(eval != null ? eval.result() : null);
     }
 
