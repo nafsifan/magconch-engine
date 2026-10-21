@@ -77,54 +77,14 @@ modules:
         E: ENDER_PEARL
         G: EGG
         P: LINGERING_POTION:WEAKNESS
-    # 允许捕捉的生物类型白名单（填入 EntityType 枚举名，可自由增减）
-    allowed-entities:
-      # --- 常见家畜与农场生物 ---
-      - COW
-      - SHEEP
-      - PIG
-      - CHICKEN
-      - RABBIT
-      - BEE
-      - TURTLE
-      - FROG
-      - AXOLOTL
-      - SQUID
-      - GLOW_SQUID
-      - MOOSHROOM
-      - GOAT
-      - SNOW_GOLEM
-      # --- 坐骑与运输生物 ---
-      - HORSE
-      - DONKEY
-      - MULE
-      - LLAMA
-      - TRADER_LLAMA
-      - CAMEL
-      - STRIDER
-      # --- 驯服与功能伴侣 ---
-      - WOLF
-      - CAT
-      - PARROT
-      - OCELOT
-      - FOX
-      - ALLAY
-      - SNIFFER
-      - ARMADILLO
-      # --- 村民体系 ---
-      - VILLAGER
-      - ZOMBIE_VILLAGER
-      # --- 生电工程与机械敌对生物 ---
-      - SHULKER
-      - ZOMBIE
-      - HUSK
-      - DROWNED
-      - SKELETON
-      - STRAY
-      - SLIME
-      - MAGMA_CUBE
-      - HOGLIN
-      - ZOGLIN
+    # 禁止捕捉的生物类型黑名单（除玩家与盔甲架外，默认允许捕捉所有生物；填入 EntityType 枚举名，可自由增减）
+    blacklisted-entities:
+      - ENDER_DRAGON      # 末影龙
+      - WITHER            # 凋灵
+      - WARDEN            # 循声守卫 / 监守者
+      - ELDER_GUARDIAN    # 远古守卫者
+      - GIANT             # 巨人
+      - WANDERING_TRADER  # 流浪商人
 
   # 经验存储系统（潜行右键附魔台灌装与直接吸收）
   exp-store:

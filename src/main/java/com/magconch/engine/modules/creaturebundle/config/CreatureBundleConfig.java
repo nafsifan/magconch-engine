@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  * 生物捕捉模块配置映射
  * <p>
- * 采用配置文件显式白名单驱动，服主可自由配置允许捕捉的生物类型。
+ * 采用配置文件黑名单驱动，默认允许捕获绝大多数活体生物，仅拦截 Boss 与特定限制实体。
  */
 public class CreatureBundleConfig {
 
@@ -24,7 +24,7 @@ public class CreatureBundleConfig {
     private List<String> recipeShape = List.of(" T ", "EPE", " G ");
     private final Map<Character, String> recipeIngredients = new LinkedHashMap<>();
     private double captureChance = 1.0;
-    private final Set<EntityType> allowedEntityTypes = new HashSet<>();
+    private final Set<EntityType> blacklistedEntityTypes = new HashSet<>();
 
     /**
      * 读取并解析配置
@@ -66,40 +66,35 @@ public class CreatureBundleConfig {
 
         this.captureChance = Math.max(0.0, Math.min(1.0, config.getDouble(path + "capture-chance", 1.0)));
 
-        // 读取允许捕捉的生物白名单
-        this.allowedEntityTypes.clear();
-        List<String> rawAllowed = config.getStringList(path + "allowed-entities");
-        if (rawAllowed != null && !rawAllowed.isEmpty()) {
-            for (String raw : rawAllowed) {
+        // 读取禁止捕捉的生物黑名单
+        this.blacklistedEntityTypes.clear();
+        List<String> rawBlacklist = config.getStringList(path + "blacklisted-entities");
+        if (rawBlacklist != null && !rawBlacklist.isEmpty()) {
+            for (String raw : rawBlacklist) {
                 try {
                     EntityType type = EntityType.valueOf(raw.trim().toUpperCase(Locale.ROOT));
-                    this.allowedEntityTypes.add(type);
+                    this.blacklistedEntityTypes.add(type);
                 } catch (IllegalArgumentException ignored) {
                     // 忽略无效的实体类型枚举
                 }
             }
         } else {
-            // 配置未指定白名单时，加载默认全量生物清单
-            loadDefaultAllowedTypes();
+            // 配置未指定黑名单时，加载默认拦截名单
+            loadDefaultBlacklistedTypes();
         }
     }
 
     /**
-     * 默认支持的全量生物清单（含友好农场生物与常见生电敌对生物）
+     * 默认拦截的生物黑名单（Boss 及特殊机制生物）
      */
-    private void loadDefaultAllowedTypes() {
-        Collections.addAll(allowedEntityTypes,
-                EntityType.COW, EntityType.SHEEP, EntityType.PIG, EntityType.CHICKEN,
-                EntityType.RABBIT, EntityType.BEE, EntityType.TURTLE, EntityType.FROG,
-                EntityType.AXOLOTL, EntityType.SQUID, EntityType.GLOW_SQUID, EntityType.MOOSHROOM,
-                EntityType.GOAT, EntityType.SNOW_GOLEM, EntityType.HORSE, EntityType.DONKEY,
-                EntityType.MULE, EntityType.LLAMA, EntityType.TRADER_LLAMA, EntityType.CAMEL,
-                EntityType.STRIDER, EntityType.WOLF, EntityType.CAT, EntityType.PARROT,
-                EntityType.OCELOT, EntityType.FOX, EntityType.ALLAY, EntityType.SNIFFER,
-                EntityType.ARMADILLO, EntityType.VILLAGER, EntityType.ZOMBIE_VILLAGER,
-                EntityType.SHULKER, EntityType.ZOMBIE, EntityType.HUSK, EntityType.DROWNED,
-                EntityType.SKELETON, EntityType.STRAY, EntityType.SLIME, EntityType.MAGMA_CUBE,
-                EntityType.HOGLIN, EntityType.ZOGLIN
+    private void loadDefaultBlacklistedTypes() {
+        Collections.addAll(blacklistedEntityTypes,
+                EntityType.ENDER_DRAGON,
+                EntityType.WITHER,
+                EntityType.WARDEN,
+                EntityType.ELDER_GUARDIAN,
+                EntityType.GIANT,
+                EntityType.WANDERING_TRADER
         );
     }
 
@@ -124,6 +119,10 @@ public class CreatureBundleConfig {
     }
 
     public boolean isAllowed(EntityType type) {
-        return allowedEntityTypes.contains(type);
+        return !blacklistedEntityTypes.contains(type);
+    }
+
+    public boolean isBlacklisted(EntityType type) {
+        return blacklistedEntityTypes.contains(type);
     }
 }

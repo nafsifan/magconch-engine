@@ -19,7 +19,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.ThrownPotion;
-import org.bukkit.entity.WanderingTrader;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -315,7 +314,7 @@ public class BundleInteractListener implements Listener {
      * 校验生物是否满足封印捕获条件
      */
     private boolean isEligibleTarget(LivingEntity living, Player thrower) {
-        if (living instanceof Player || living instanceof ArmorStand || living instanceof WanderingTrader) {
+        if (living instanceof Player || living instanceof ArmorStand) {
             return false;
         }
         if (living.isDead() || living.getHealth() <= 0 || !living.isValid()) {
