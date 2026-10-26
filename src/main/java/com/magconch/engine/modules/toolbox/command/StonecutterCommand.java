@@ -102,11 +102,11 @@ public class StonecutterCommand implements SubCommand, CommandExecutor, TabCompl
         }
 
         if (!config.isStonecutterEnabled()) {
-            plugin.getLanguageManager().sendMessage(player, "modules.toolbox.disabled");
+            plugin.getLanguageManager().sendMessage(player, "toolbox.disabled");
             return true;
         }
 
-        String rawTitle = plugin.getLanguageManager().getMessage("modules.toolbox.stonecutter_title");
+        String rawTitle = plugin.getLanguageManager().getMessage("toolbox.stonecutter_title");
         Component title = LegacyComponentSerializer.legacySection().deserialize(TextUtil.colorize(rawTitle));
 
         InventoryView view = MenuType.STONECUTTER.builder()

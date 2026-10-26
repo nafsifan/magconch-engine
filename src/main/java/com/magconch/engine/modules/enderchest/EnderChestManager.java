@@ -75,8 +75,8 @@ public class EnderChestManager {
         // 3. 构造标题组件
         boolean isSelf = viewer.getUniqueId().equals(ownerUuid);
         String titleTemplate = isSelf
-                ? plugin.getLanguageManager().getMessage("modules.enderchest.title_self")
-                : plugin.getLanguageManager().getMessage("modules.enderchest.title_other", "{player}", ownerName);
+                ? plugin.getLanguageManager().getMessage("enderchest.title_self")
+                : plugin.getLanguageManager().getMessage("enderchest.title_other", "{player}", ownerName);
         Component title = LegacyComponentSerializer.legacySection().deserialize(TextUtil.colorize(titleTemplate));
 
         // 4. 创建 54 格 Inventory 实例并绑定 Holder

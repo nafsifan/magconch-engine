@@ -102,11 +102,11 @@ public class CraftCommand implements SubCommand, CommandExecutor, TabCompleter {
         }
 
         if (!config.isCraftEnabled()) {
-            plugin.getLanguageManager().sendMessage(player, "modules.toolbox.disabled");
+            plugin.getLanguageManager().sendMessage(player, "toolbox.disabled");
             return true;
         }
 
-        String rawTitle = plugin.getLanguageManager().getMessage("modules.toolbox.craft_title");
+        String rawTitle = plugin.getLanguageManager().getMessage("toolbox.craft_title");
         Component title = LegacyComponentSerializer.legacySection().deserialize(TextUtil.colorize(rawTitle));
 
         InventoryView view = MenuType.CRAFTING.builder()

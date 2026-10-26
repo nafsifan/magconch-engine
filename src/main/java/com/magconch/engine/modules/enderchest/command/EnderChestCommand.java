@@ -101,7 +101,7 @@ public class EnderChestCommand implements SubCommand, CommandExecutor, TabComple
         }
 
         if (!config.isEnabled()) {
-            plugin.getLanguageManager().sendMessage(player, "modules.enderchest.disabled");
+            plugin.getLanguageManager().sendMessage(player, "enderchest.disabled");
             return true;
         }
 
