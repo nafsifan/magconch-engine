@@ -6,7 +6,6 @@ import com.magconch.engine.core.LanguageManager;
 import com.magconch.engine.core.ModuleManager;
 import com.magconch.engine.modules.compresseditem.CompressedItemModule;
 import com.magconch.engine.modules.creaturebundle.CreatureBundleModule;
-import com.magconch.engine.modules.enderchest.EnderChestModule;
 import com.magconch.engine.modules.expstore.ExpStoreModule;
 import com.magconch.engine.modules.flight.FlightModule;
 import com.magconch.engine.modules.harvester.HarvesterModule;
@@ -85,7 +84,6 @@ public class MagconchEngine extends JavaPlugin {
             this.moduleManager.registerModule(new TeleportCostModule(this));
             this.moduleManager.registerModule(new TrashModule(this));
             this.moduleManager.registerModule(new ToolboxModule(this));
-            this.moduleManager.registerModule(new EnderChestModule(this));
             this.moduleManager.registerModule(new ShowItemModule(this));
             this.moduleManager.registerModule(new CreatureBundleModule(this));
             this.moduleManager.registerModule(new ExpStoreModule(this));

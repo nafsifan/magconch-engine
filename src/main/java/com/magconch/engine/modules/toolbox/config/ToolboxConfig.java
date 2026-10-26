@@ -16,6 +16,7 @@ public class ToolboxConfig {
     private boolean enabled = true;
     private boolean craftEnabled = true;
     private boolean stonecutterEnabled = true;
+    private boolean enderchestEnabled = true;
 
     // ==========================================
     // 加载与刷新
@@ -34,6 +35,7 @@ public class ToolboxConfig {
         this.enabled = config.getBoolean("modules.toolbox.enabled", true);
         this.craftEnabled = config.getBoolean("modules.toolbox.craft.enabled", true);
         this.stonecutterEnabled = config.getBoolean("modules.toolbox.stonecutter.enabled", true);
+        this.enderchestEnabled = config.getBoolean("modules.toolbox.enderchest.enabled", true);
     }
 
     // ==========================================
@@ -50,5 +52,9 @@ public class ToolboxConfig {
 
     public boolean isStonecutterEnabled() {
         return enabled && stonecutterEnabled;
+    }
+
+    public boolean isEnderchestEnabled() {
+        return enabled && enderchestEnabled;
     }
 }

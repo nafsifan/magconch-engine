@@ -3,6 +3,7 @@ package com.magconch.engine.modules.toolbox;
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.api.EngineModule;
 import com.magconch.engine.modules.toolbox.command.CraftCommand;
+import com.magconch.engine.modules.toolbox.command.EnderChestCommand;
 import com.magconch.engine.modules.toolbox.command.StonecutterCommand;
 import com.magconch.engine.modules.toolbox.config.ToolboxConfig;
 import org.bukkit.command.PluginCommand;
@@ -26,6 +27,7 @@ public class ToolboxModule implements EngineModule {
     private boolean enabled;
     private CraftCommand craftCommand;
     private StonecutterCommand stonecutterCommand;
+    private EnderChestCommand enderChestCommand;
 
     public ToolboxModule(MagconchEngine plugin) {
         this.plugin = plugin;
@@ -66,6 +68,18 @@ public class ToolboxModule implements EngineModule {
             if (stonecutterAlias != null) {
                 stonecutterAlias.setExecutor(stonecutterCommand);
                 stonecutterAlias.setTabCompleter(stonecutterCommand);
+            }
+        }
+
+        // 4. 实例化并注册末影箱指令
+        if (enderChestCommand == null) {
+            enderChestCommand = new EnderChestCommand(plugin, config);
+            plugin.getMainCommand().registerSubCommand(enderChestCommand);
+
+            PluginCommand ecAlias = plugin.getCommand("ec");
+            if (ecAlias != null) {
+                ecAlias.setExecutor(enderChestCommand);
+                ecAlias.setTabCompleter(enderChestCommand);
             }
         }
 

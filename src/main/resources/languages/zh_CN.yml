@@ -91,7 +91,7 @@ commands:
   stonecutter:
     description: "打开随身切石机"
   ec:
-    description: "打开扩展末影箱"
+    description: "打开随身末影箱"
 
 creature-bundle:
   item:
@@ -129,8 +129,3 @@ toolbox:
   craft_title: "&8工作台"
   stonecutter_title: "&8切石机"
   disabled: "{prefix}&#ff4d4f该随身工具当前已被管理员禁用。"
-
-enderchest:
-  title_self: "&8末影箱"
-  title_other: "&8{player} 的末影箱"
-  disabled: "{prefix}&#ff4d4f扩展末影箱功能当前已被管理员禁用。"
