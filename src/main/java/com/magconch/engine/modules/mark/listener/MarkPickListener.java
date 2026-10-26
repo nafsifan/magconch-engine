@@ -2,11 +2,15 @@ package com.magconch.engine.modules.mark.listener;
 
 import com.magconch.engine.modules.mark.MarkModule;
 import io.papermc.paper.event.player.PlayerPickItemEvent;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * 标点交互监听器
@@ -34,6 +38,30 @@ public class MarkPickListener implements Listener {
 
         event.setCancelled(true);
         module.performMark(player);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (!module.isEnabled()) {
+            return;
+        }
+
+        Action action = event.getAction();
+        if (action != Action.LEFT_CLICK_AIR && action != Action.LEFT_CLICK_BLOCK) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+
+        if (mainHand.getType() != Material.SPYGLASS && offHand.getType() != Material.SPYGLASS) {
+            return;
+        }
+
+        if (module.performMark(player)) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

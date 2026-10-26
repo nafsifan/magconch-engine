@@ -10,7 +10,9 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Shulker;
 import org.bukkit.event.HandlerList;
@@ -121,17 +123,17 @@ public class MarkModule implements EngineModule {
                 FluidCollisionMode.NEVER,
                 false,
                 0.3,
-                e -> e instanceof Item
+                e -> !e.equals(player) && (e instanceof Item || (e instanceof LivingEntity && !(e instanceof Shulker && !((LivingEntity) e).hasAI())))
         );
 
         if (result == null) {
             return false;
         }
 
-        Item hitItem = (result.getHitEntity() instanceof Item item) ? item : null;
+        Entity hitEntity = result.getHitEntity();
         Block hitBlock = result.getHitBlock();
 
-        if (hitItem == null && (hitBlock == null || hitBlock.getType().isAir())) {
+        if (hitEntity == null && (hitBlock == null || hitBlock.getType().isAir())) {
             return false;
         }
 
@@ -141,14 +143,14 @@ public class MarkModule implements EngineModule {
 
         Location soundLocation;
 
-        if (hitItem != null) {
-            soundLocation = hitItem.getLocation();
-            boolean wasGlowing = hitItem.isGlowing();
-            hitItem.setGlowing(true);
+        if (hitEntity != null) {
+            soundLocation = hitEntity.getLocation();
+            boolean wasGlowing = hitEntity.isGlowing();
+            hitEntity.setGlowing(true);
 
             registerActiveMark(uuid, () -> {
-                if (hitItem.isValid() && !wasGlowing) {
-                    hitItem.setGlowing(false);
+                if (hitEntity.isValid() && !wasGlowing) {
+                    hitEntity.setGlowing(false);
                 }
             });
         } else {

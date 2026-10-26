@@ -116,7 +116,7 @@ modules:
   mentions:
     enabled: true
 
-  # 标点系统 (潜行+鼠标中键 或 /magc mark 触发目标高亮)
+  # 标点系统 (潜行+鼠标中键、手持望远镜左键 或 /magc mark 触发目标高亮)
   mark:
     enabled: true
     # 标记高亮持续时间 (秒)
