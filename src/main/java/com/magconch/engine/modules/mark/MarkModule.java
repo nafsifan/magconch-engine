@@ -10,7 +10,9 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Shulker;
 import org.bukkit.event.HandlerList;
@@ -43,7 +45,7 @@ public class MarkModule implements EngineModule {
     private final Map<UUID, ActiveMark> activeMarks = new ConcurrentHashMap<>();
     private final Set<UUID> disabledPlayers = ConcurrentHashMap.newKeySet();
 
-    private record ActiveMark(BukkitTask task, Runnable cleanup) {}
+    private record ActiveMark(BukkitTask task, Runnable cleanup, Entity markerEntity) {}
 
     public MarkModule(MagconchEngine plugin) {
         this.plugin = plugin;
@@ -135,17 +137,25 @@ public class MarkModule implements EngineModule {
                 FluidCollisionMode.NEVER,
                 false,
                 0.3,
-                e -> e instanceof Item
+                e -> {
+                    if (e.equals(player) || e instanceof Player) {
+                        return false;
+                    }
+                    if (e instanceof Shulker shulker && !shulker.hasAI()) {
+                        return false;
+                    }
+                    return e instanceof Item || e instanceof LivingEntity;
+                }
         );
 
         if (result == null) {
             return false;
         }
 
-        Item hitItem = (result.getHitEntity() instanceof Item item) ? item : null;
+        Entity hitEntity = result.getHitEntity();
         Block hitBlock = result.getHitBlock();
 
-        if (hitItem == null && (hitBlock == null || hitBlock.getType().isAir())) {
+        if (hitEntity == null && (hitBlock == null || hitBlock.getType().isAir())) {
             return false;
         }
 
@@ -155,16 +165,16 @@ public class MarkModule implements EngineModule {
 
         Location soundLocation;
 
-        if (hitItem != null) {
-            soundLocation = hitItem.getLocation();
-            boolean wasGlowing = hitItem.isGlowing();
-            hitItem.setGlowing(true);
+        if (hitEntity != null) {
+            soundLocation = hitEntity.getLocation();
+            boolean wasGlowing = hitEntity.isGlowing();
+            hitEntity.setGlowing(true);
 
             registerActiveMark(uuid, () -> {
-                if (hitItem.isValid() && !wasGlowing) {
-                    hitItem.setGlowing(false);
+                if (hitEntity.isValid() && !wasGlowing) {
+                    hitEntity.setGlowing(false);
                 }
-            });
+            }, null);
         } else {
             soundLocation = hitBlock.getLocation().add(0.5, 0.5, 0.5);
             Location spawnLoc = hitBlock.getLocation();
@@ -179,39 +189,61 @@ public class MarkModule implements EngineModule {
                 s.setPersistent(false);
             });
 
+            for (UUID disabledId : disabledPlayers) {
+                Player dp = plugin.getServer().getPlayer(disabledId);
+                if (dp != null && dp.isOnline()) {
+                    dp.hideEntity(plugin, marker);
+                }
+            }
+
             registerActiveMark(uuid, () -> {
                 if (marker.isValid()) {
                     marker.remove();
                 }
-            });
+            }, marker);
         }
 
-        soundLocation.getWorld().playSound(
-                soundLocation,
-                Sound.BLOCK_NOTE_BLOCK_BELL,
-                SoundCategory.PLAYERS,
-                2.5f,
-                1.5f
-        );
+        double maxDistSq = 32.0 * 32.0;
+        boolean originHeard = false;
 
-        player.playSound(
-                player.getLocation(),
-                Sound.BLOCK_NOTE_BLOCK_BELL,
-                SoundCategory.PLAYERS,
-                1.2f,
-                1.5f
-        );
+        for (Player online : soundLocation.getWorld().getPlayers()) {
+            if (!isPlayerEnabled(online.getUniqueId())) {
+                continue;
+            }
+            if (online.getLocation().distanceSquared(soundLocation) <= maxDistSq) {
+                online.playSound(
+                        soundLocation,
+                        Sound.BLOCK_NOTE_BLOCK_BELL,
+                        SoundCategory.PLAYERS,
+                        2.5f,
+                        1.5f
+                );
+                if (online.equals(player)) {
+                    originHeard = true;
+                }
+            }
+        }
+
+        if (!originHeard) {
+            player.playSound(
+                    player.getLocation(),
+                    Sound.BLOCK_NOTE_BLOCK_BELL,
+                    SoundCategory.PLAYERS,
+                    1.2f,
+                    1.5f
+            );
+        }
 
         return true;
     }
 
-    private void registerActiveMark(UUID uuid, Runnable cleanup) {
+    private void registerActiveMark(UUID uuid, Runnable cleanup, Entity markerEntity) {
         BukkitTask task = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             cleanup.run();
             activeMarks.remove(uuid);
         }, config.getDuration() * 20L);
 
-        activeMarks.put(uuid, new ActiveMark(task, cleanup));
+        activeMarks.put(uuid, new ActiveMark(task, cleanup, markerEntity));
     }
 
     public void clearPlayerMark(UUID uuid) {
@@ -228,11 +260,26 @@ public class MarkModule implements EngineModule {
     }
 
     public boolean toggleMark(UUID uuid) {
+        Player p = plugin.getServer().getPlayer(uuid);
         if (disabledPlayers.contains(uuid)) {
             disabledPlayers.remove(uuid);
+            if (p != null && p.isOnline()) {
+                for (ActiveMark am : activeMarks.values()) {
+                    if (am.markerEntity() != null && am.markerEntity().isValid()) {
+                        p.showEntity(plugin, am.markerEntity());
+                    }
+                }
+            }
             return true;
         } else {
             disabledPlayers.add(uuid);
+            if (p != null && p.isOnline()) {
+                for (ActiveMark am : activeMarks.values()) {
+                    if (am.markerEntity() != null && am.markerEntity().isValid()) {
+                        p.hideEntity(plugin, am.markerEntity());
+                    }
+                }
+            }
             return false;
         }
     }
