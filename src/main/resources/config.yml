@@ -133,3 +133,7 @@ modules:
       enabled: true
     stonecutter:
       enabled: true
+
+  # 54 格扩展末影箱模块
+  enderchest:
+    enabled: true

@@ -31,6 +31,11 @@ commands:
     description: 打开随身切石机
     permission: magconch.toolbox.stonecutter
     usage: /<command>
+  ec:
+    description: 打开扩展末影箱
+    aliases: [enderchest]
+    permission: magconch.enderchest.use
+    usage: /<command> [player]
   showitem:
     description: 向全服展示手中物品
     aliases: [show]
@@ -63,6 +68,8 @@ permissions:
       magconch.use.mark: true
       magconch.toolbox.craft: true
       magconch.toolbox.stonecutter: true
+      magconch.enderchest.use: true
+      magconch.enderchest.other: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -126,3 +133,9 @@ permissions:
   magconch.toolbox.stonecutter:
     description: 允许使用随身切石机指令
     default: true
+  magconch.enderchest.use:
+    description: 允许打开自身 54 格末影箱
+    default: true
+  magconch.enderchest.other:
+    description: 允许跨空间查阅与编辑他人 54 格末影箱
+    default: op

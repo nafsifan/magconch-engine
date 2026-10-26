@@ -100,6 +100,8 @@ commands:
     description: "Open portable crafting table"
   stonecutter:
     description: "Open portable stonecutter"
+  ec:
+    description: "Open expanded ender chest"
 
 creature-bundle:
   item:
@@ -149,3 +151,9 @@ toolbox:
   stonecutter_title: "&8Stonecutter"
   disabled: >-
     {prefix}&#ff4d4fThis tool is disabled by administrators.
+
+enderchest:
+  title_self: "&8Ender Chest"
+  title_other: "&8{player}'s Ender Chest"
+  disabled: >-
+    {prefix}&#ff4d4fEnder chest feature is currently disabled.
