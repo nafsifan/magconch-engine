@@ -119,7 +119,7 @@ public class MarkModule implements EngineModule {
                 player.getEyeLocation().getDirection(),
                 config.getRange(),
                 FluidCollisionMode.NEVER,
-                true,
+                false,
                 0.3,
                 e -> e instanceof Item
         );
