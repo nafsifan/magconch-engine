@@ -84,6 +84,8 @@ commands:
     description: "展示手中物品"
   bundle:
     description: "给予玩家捕捉药水"
+  mark:
+    description: "标记准星所指的目标"
 
 creature-bundle:
   item:

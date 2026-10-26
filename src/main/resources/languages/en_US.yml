@@ -94,6 +94,8 @@ commands:
     description: "Show held item to everyone"
   bundle:
     description: "Give capture potion to player"
+  mark:
+    description: "Mark target in crosshair"
 
 creature-bundle:
   item:

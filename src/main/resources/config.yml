@@ -115,3 +115,13 @@ modules:
   # 聊天提及艾特系统 (支持 @玩家、@everyone 与控制台广播)
   mentions:
     enabled: true
+
+  # 标点系统 (潜行+鼠标中键 或 /magc mark 触发目标高亮)
+  mark:
+    enabled: true
+    # 标记高亮持续时间 (秒)
+    duration: 5
+    # 防连点冷却时间 (秒)
+    cooldown: 1.0
+    # 视线最大探测距离 (格)
+    range: 64.0

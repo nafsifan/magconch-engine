@@ -52,6 +52,7 @@ permissions:
       magconch.mentions.use: true
       magconch.mentions.everyone: true
       magconch.mentions.bypass: true
+      magconch.use.mark: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -106,3 +107,6 @@ permissions:
   magconch.mentions.bypass:
     description: 豁免聊天艾特提及的冷却时间
     default: op
+  magconch.use.mark:
+    description: 允许使用标点功能
+    default: true

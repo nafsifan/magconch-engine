@@ -9,6 +9,7 @@ import com.magconch.engine.modules.creaturebundle.CreatureBundleModule;
 import com.magconch.engine.modules.expstore.ExpStoreModule;
 import com.magconch.engine.modules.flight.FlightModule;
 import com.magconch.engine.modules.harvester.HarvesterModule;
+import com.magconch.engine.modules.mark.MarkModule;
 import com.magconch.engine.modules.mentions.MentionsModule;
 import com.magconch.engine.modules.signcolor.SignColorModule;
 import com.magconch.engine.modules.teleportcost.TeleportCostModule;
@@ -88,6 +89,7 @@ public class MagconchEngine extends JavaPlugin {
             this.moduleManager.registerModule(new HarvesterModule(this));
             this.moduleManager.registerModule(new SignColorModule(this));
             this.moduleManager.registerModule(new MentionsModule(this));
+            this.moduleManager.registerModule(new MarkModule(this));
 
             // 6. 统一调度启用所有挂载模块
             this.moduleManager.enableAll();
