@@ -43,6 +43,7 @@ public class SignColorModule implements EngineModule {
     @Override
     public void onDisable() {
         if (listener != null) {
+            listener.clear();
             HandlerList.unregisterAll(listener);
             listener = null;
         }

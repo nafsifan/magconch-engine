@@ -2,32 +2,34 @@ package com.magconch.engine.modules.signcolor.listener;
 
 import com.magconch.engine.MagconchEngine;
 import com.magconch.engine.modules.signcolor.config.SignColorConfig;
+import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.block.sign.SignSide;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 告示牌彩色文字解析与无损还原监听器
+ * 告示牌彩色文字解析与二次编辑无损还原监听器
  * <p>
- * 支持在告示牌上解析 & 颜色代码与十六进制色，并在二次编辑时无损还原源码。
+ * 解决原版客户端重新编辑告示牌时剥离颜色代码的问题。
+ * 在提交时将带颜色代码的原始字符串持久化到方块容器中；
+ * 在唤起编辑时临时回填源码并延迟发包，确保客户端编辑框能完整显示颜色代码。
  */
 public class SignColorListener implements Listener {
 
@@ -41,106 +43,93 @@ public class SignColorListener implements Listener {
     private final MagconchEngine plugin;
     private final SignColorConfig config;
 
+    private final NamespacedKey frontKey;
+    private final NamespacedKey backKey;
+
+    // 记录处于延迟打开流程中的玩家，防止插件主动调用 openSign 时陷入递归拦截
+    private final Set<UUID> pendingEditorOpens = ConcurrentHashMap.newKeySet();
+
     public SignColorListener(MagconchEngine plugin, SignColorConfig config) {
         this.plugin = plugin;
         this.config = config;
+        this.frontKey = new NamespacedKey(plugin, "raw_sign_front");
+        this.backKey = new NamespacedKey(plugin, "raw_sign_back");
     }
 
     // ==========================================
-    // 右键唤起编辑时无损还原颜色代码
+    // 告示牌打开编辑：无损还原颜色代码
     // ==========================================
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        // 1. 基础条件校验：仅响应主手右键方块
-        if (event.getHand() != EquipmentSlot.HAND || event.getAction() != Action.RIGHT_CLICK_BLOCK) {
-            return;
-        }
-
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onPlayerOpenSign(PlayerOpenSignEvent event) {
         if (!config.isEnabled()) {
             return;
         }
 
-        Player player = event.getPlayer();
-        if (player.getGameMode() == GameMode.SPECTATOR) {
+        // 仅响应右键已放置告示牌的再编辑，新放置告示牌无需还原
+        if (event.getCause() != PlayerOpenSignEvent.Cause.INTERACT) {
             return;
         }
 
-        // 2. 权限校验：拥有颜色权限才介入颜色无损还原，无权限完全走原版流程
+        Player player = event.getPlayer();
         if (!player.hasPermission(PERMISSION_USE)) {
             return;
         }
 
-        // 3. 目标方块校验
-        Block block = event.getClickedBlock();
-        if (block == null) {
+        // 放行本插件延迟触发的二次打开，消费标记后直接由原版开启编辑界面
+        if (pendingEditorOpens.remove(player.getUniqueId())) {
             return;
         }
 
-        BlockState state = block.getState();
-        if (!(state instanceof Sign sign)) {
-            return;
-        }
-
-        // 4. 已打蜡封死的告示牌遵循原版规则禁止编辑
-        if (sign.isWaxed()) {
-            return;
-        }
-
-        // 5. 原版交互让路处理
-        ItemStack handItem = player.getInventory().getItemInMainHand();
-        Material handType = handItem.getType();
-
-        // 潜行手持方块优先放置方块/插火把
-        if (player.isSneaking() && handType.isBlock()) {
-            return;
-        }
-
-        // 手持染料、蜜脾、发光墨囊等原版道具时让路
-        if (isSignModifierItem(handType)) {
-            return;
-        }
-
-        // 6. 领地与安全防盗改检查（模拟触发破坏事件让外部领地/保护插件裁决）
-        if (event.useInteractedBlock() == Event.Result.DENY) {
-            return;
-        }
-
-        BlockBreakEvent breakEvent = new BlockBreakEvent(block, player);
-        Bukkit.getPluginManager().callEvent(breakEvent);
-        if (breakEvent.isCancelled()) {
-            return;
-        }
-
-        // 拦截原版右键动作，防止触发其他行为
-        event.setCancelled(true);
-
-        // 7. 判定交互面（正面/反面）
-        Side side = sign.getInteractableSideFor(player);
-        if (side == null) {
-            side = Side.FRONT;
-        }
-
-        // 8. 还原现有文字中的颜色代码为 & 格式，确保玩家在编辑框中无损修改错别字
+        Sign sign = event.getSign();
+        Side side = event.getSide();
         SignSide signSide = sign.getSide(side);
-        for (int i = 0; i < 4; i++) {
-            Component current = signSide.line(i);
-            if (current != null) {
-                String serialized = COLOR_SERIALIZER.serialize(current);
-                signSide.line(i, Component.text(serialized));
+
+        // 优先从方块持久化容器获取原始输入文本；若历史方块未记录则从组件反序列化
+        PersistentDataContainer pdc = sign.getPersistentDataContainer();
+        String stored = pdc.get(getSideKey(side), PersistentDataType.STRING);
+        String[] rawLines = (stored != null) ? stored.split("\n", -1) : null;
+
+        if (rawLines == null) {
+            rawLines = new String[4];
+            boolean containsColorCode = false;
+            for (int i = 0; i < 4; i++) {
+                Component current = signSide.line(i);
+                String serialized = (current != null) ? COLOR_SERIALIZER.serialize(current) : "";
+                rawLines[i] = serialized;
+                if (serialized.contains("&")) {
+                    containsColorCode = true;
+                }
+            }
+
+            // 无任何颜色代码的普通告示牌直接放行，完全遵循原版流程
+            if (!containsColorCode) {
+                return;
             }
         }
-        sign.update(false, false);
 
-        // 9. 打开对应朝向的原版告示牌编辑界面
-        player.openSign(sign, side);
-    }
+        // 拦截原版即刻弹窗，先将带 & 源码写入方块并强制同步客户端
+        event.setCancelled(true);
 
-    private boolean isSignModifierItem(Material type) {
-        if (type == Material.HONEYCOMB || type == Material.GLOW_INK_SAC || type == Material.INK_SAC) {
-            return true;
+        for (int i = 0; i < 4; i++) {
+            String line = (i < rawLines.length && rawLines[i] != null) ? rawLines[i] : "";
+            signSide.line(i, Component.text(line));
         }
-        return type.name().endsWith("_DYE");
+        sign.update(true, false);
+
+        UUID playerId = player.getUniqueId();
+        pendingEditorOpens.add(playerId);
+
+        // 延迟 2 tick 唤起编辑界面，确保客户端已接收并应用包含源码的方块数据包
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            try {
+                if (player.isOnline() && sign.isPlaced() && player.getWorld().equals(sign.getWorld())) {
+                    player.openSign(sign, side);
+                }
+            } finally {
+                pendingEditorOpens.remove(playerId);
+            }
+        }, 2L);
     }
 
     // ==========================================
@@ -158,13 +147,52 @@ public class SignColorListener implements Listener {
             return;
         }
 
+        String[] rawLines = new String[4];
+        boolean hasColor = false;
+
         // 解析 & 颜色代码与十六进制色为原生文本组件
         for (int i = 0; i < 4; i++) {
             String line = event.getLine(i);
-            if (line != null && line.contains("&")) {
-                Component colored = COLOR_SERIALIZER.deserialize(line);
-                event.line(i, colored);
+            if (line == null) {
+                rawLines[i] = "";
+                continue;
+            }
+
+            rawLines[i] = line;
+            if (line.contains("&")) {
+                hasColor = true;
+                event.line(i, COLOR_SERIALIZER.deserialize(line));
             }
         }
+
+        // 延迟至主线程下一任务将原始输入存入方块持久化容器，避开事件处理中方块实体的写冲突
+        Block block = event.getBlock();
+        NamespacedKey rawTextKey = getSideKey(event.getSide());
+        boolean shouldSave = hasColor;
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (block.getState() instanceof Sign sign) {
+                PersistentDataContainer pdc = sign.getPersistentDataContainer();
+                if (shouldSave) {
+                    pdc.set(rawTextKey, PersistentDataType.STRING, String.join("\n", rawLines));
+                } else {
+                    pdc.remove(rawTextKey);
+                }
+                sign.update(true, false);
+            }
+        });
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        pendingEditorOpens.remove(event.getPlayer().getUniqueId());
+    }
+
+    public void clear() {
+        pendingEditorOpens.clear();
+    }
+
+    private NamespacedKey getSideKey(Side side) {
+        return side == Side.BACK ? backKey : frontKey;
     }
 }
