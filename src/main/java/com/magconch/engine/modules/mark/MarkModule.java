@@ -10,14 +10,18 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Shulker;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Transformation;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 
 import java.util.Map;
 import java.util.Set;
@@ -138,10 +142,7 @@ public class MarkModule implements EngineModule {
                 false,
                 0.3,
                 e -> {
-                    if (e.equals(player) || e instanceof Player) {
-                        return false;
-                    }
-                    if (e instanceof Shulker shulker && !shulker.hasAI()) {
+                    if (e.equals(player) || e instanceof Player || e instanceof Display) {
                         return false;
                     }
                     return e instanceof Item || e instanceof LivingEntity;
@@ -179,14 +180,17 @@ public class MarkModule implements EngineModule {
             soundLocation = hitBlock.getLocation().add(0.5, 0.5, 0.5);
             Location spawnLoc = hitBlock.getLocation();
 
-            Shulker marker = hitBlock.getWorld().spawn(spawnLoc, Shulker.class, s -> {
-                s.setAI(false);
-                s.setInvisible(true);
-                s.setInvulnerable(true);
-                s.setSilent(true);
-                s.setCollidable(false);
-                s.setGlowing(true);
-                s.setPersistent(false);
+            BlockDisplay marker = hitBlock.getWorld().spawn(spawnLoc, BlockDisplay.class, display -> {
+                display.setBlock(hitBlock.getBlockData());
+                display.setBrightness(new Display.Brightness(15, 15));
+                display.setTransformation(new Transformation(
+                        new Vector3f(-0.002f, -0.002f, -0.002f),
+                        new AxisAngle4f(),
+                        new Vector3f(1.004f, 1.004f, 1.004f),
+                        new AxisAngle4f()
+                ));
+                display.setGlowing(true);
+                display.setPersistent(false);
             });
 
             for (UUID disabledId : disabledPlayers) {
