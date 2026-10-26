@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -62,6 +63,27 @@ public class MarkPickListener implements Listener {
         if (module.performMark(player)) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+        if (!event.isSneaking() || !module.isEnabled()) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+        if (!player.isHandRaised()) {
+            return;
+        }
+
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+
+        if (mainHand.getType() != Material.SPYGLASS && offHand.getType() != Material.SPYGLASS) {
+            return;
+        }
+
+        module.performMark(player);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
