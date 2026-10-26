@@ -85,7 +85,7 @@ commands:
   bundle:
     description: "给予玩家捕捉药水"
   mark:
-    description: "标记准星所指的目标"
+    description: "切换个人标点功能开关"
   craft:
     description: "打开随身工作台"
   stonecutter:
@@ -124,6 +124,10 @@ mentions:
 
 compressed-item:
   lore_format: "{color}◈ {level}x 压缩 &r&#8c8c8c({capacity})"
+
+mark:
+  enabled: "{prefix}&#52c41a已开启个人标点功能。"
+  disabled: "{prefix}&#ff4d4f已关闭个人标点功能。"
 
 toolbox:
   craft_title: "&8工作台"

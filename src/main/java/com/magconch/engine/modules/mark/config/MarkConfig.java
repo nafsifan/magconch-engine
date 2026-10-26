@@ -10,7 +10,7 @@ public class MarkConfig {
     private boolean enabled = true;
     private int duration = 5;
     private double cooldown = 1.0;
-    private double range = 64.0;
+    private double range = 128.0;
 
     /**
      * 从主配置文件加载标记模块配置
@@ -26,7 +26,7 @@ public class MarkConfig {
         this.enabled = config.getBoolean(path + "enabled", true);
         this.duration = config.getInt(path + "duration", 5);
         this.cooldown = config.getDouble(path + "cooldown", 1.0);
-        this.range = config.getDouble(path + "range", 64.0);
+        this.range = config.getDouble(path + "range", 128.0);
     }
 
     public boolean isEnabled() {

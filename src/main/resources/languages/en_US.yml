@@ -95,7 +95,7 @@ commands:
   bundle:
     description: "Give capture potion to player"
   mark:
-    description: "Mark target in crosshair"
+    description: "Toggle personal mark feature"
   craft:
     description: "Open portable crafting table"
   stonecutter:
@@ -145,6 +145,10 @@ mentions:
 
 compressed-item:
   lore_format: "{color}◈ {level}x Compressed &r&#8c8c8c({capacity})"
+
+mark:
+  enabled: "{prefix}&#52c41aMark feature enabled."
+  disabled: "{prefix}&#ff4d4fMark feature disabled."
 
 toolbox:
   craft_title: "&8Crafting Table"

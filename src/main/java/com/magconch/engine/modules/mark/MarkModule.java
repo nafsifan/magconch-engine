@@ -10,9 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Shulker;
 import org.bukkit.event.HandlerList;
@@ -20,6 +18,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.RayTraceResult;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,6 +41,7 @@ public class MarkModule implements EngineModule {
 
     private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, ActiveMark> activeMarks = new ConcurrentHashMap<>();
+    private final Set<UUID> disabledPlayers = ConcurrentHashMap.newKeySet();
 
     private record ActiveMark(BukkitTask task, Runnable cleanup) {}
 
@@ -81,6 +81,7 @@ public class MarkModule implements EngineModule {
 
         clearAllMarks();
         cooldowns.clear();
+        disabledPlayers.clear();
     }
 
     @Override
@@ -99,13 +100,24 @@ public class MarkModule implements EngineModule {
     }
 
     /**
-     * 为指定玩家触发标点流程
+     * 为指定玩家触发默认距离标点
      *
      * @param player 发起标记的玩家
      * @return true 为成功标点，false 为未命中目标或冷却中
      */
     public boolean performMark(Player player) {
-        if (!enabled || player == null || !player.isOnline() || !player.hasPermission(PERMISSION_USE)) {
+        return performMark(player, config.getRange());
+    }
+
+    /**
+     * 为指定玩家触发指定距离标点
+     *
+     * @param player   发起标记的玩家
+     * @param maxRange 最大探测距离 (格)
+     * @return true 为成功标点，false 为未命中目标或冷却中
+     */
+    public boolean performMark(Player player, double maxRange) {
+        if (!enabled || player == null || !player.isOnline() || !player.hasPermission(PERMISSION_USE) || !isPlayerEnabled(player.getUniqueId())) {
             return false;
         }
 
@@ -119,21 +131,21 @@ public class MarkModule implements EngineModule {
         RayTraceResult result = player.getWorld().rayTrace(
                 player.getEyeLocation(),
                 player.getEyeLocation().getDirection(),
-                config.getRange(),
+                maxRange,
                 FluidCollisionMode.NEVER,
                 false,
                 0.3,
-                e -> !e.equals(player) && (e instanceof Item || (e instanceof LivingEntity && !(e instanceof Shulker && !((LivingEntity) e).hasAI())))
+                e -> e instanceof Item
         );
 
         if (result == null) {
             return false;
         }
 
-        Entity hitEntity = result.getHitEntity();
+        Item hitItem = (result.getHitEntity() instanceof Item item) ? item : null;
         Block hitBlock = result.getHitBlock();
 
-        if (hitEntity == null && (hitBlock == null || hitBlock.getType().isAir())) {
+        if (hitItem == null && (hitBlock == null || hitBlock.getType().isAir())) {
             return false;
         }
 
@@ -143,14 +155,14 @@ public class MarkModule implements EngineModule {
 
         Location soundLocation;
 
-        if (hitEntity != null) {
-            soundLocation = hitEntity.getLocation();
-            boolean wasGlowing = hitEntity.isGlowing();
-            hitEntity.setGlowing(true);
+        if (hitItem != null) {
+            soundLocation = hitItem.getLocation();
+            boolean wasGlowing = hitItem.isGlowing();
+            hitItem.setGlowing(true);
 
             registerActiveMark(uuid, () -> {
-                if (hitEntity.isValid() && !wasGlowing) {
-                    hitEntity.setGlowing(false);
+                if (hitItem.isValid() && !wasGlowing) {
+                    hitItem.setGlowing(false);
                 }
             });
         } else {
@@ -178,7 +190,15 @@ public class MarkModule implements EngineModule {
                 soundLocation,
                 Sound.BLOCK_NOTE_BLOCK_BELL,
                 SoundCategory.PLAYERS,
-                1.0f,
+                2.5f,
+                1.5f
+        );
+
+        player.playSound(
+                player.getLocation(),
+                Sound.BLOCK_NOTE_BLOCK_BELL,
+                SoundCategory.PLAYERS,
+                1.2f,
                 1.5f
         );
 
@@ -204,6 +224,21 @@ public class MarkModule implements EngineModule {
     public void onPlayerQuit(UUID uuid) {
         clearPlayerMark(uuid);
         cooldowns.remove(uuid);
+        disabledPlayers.remove(uuid);
+    }
+
+    public boolean toggleMark(UUID uuid) {
+        if (disabledPlayers.contains(uuid)) {
+            disabledPlayers.remove(uuid);
+            return true;
+        } else {
+            disabledPlayers.add(uuid);
+            return false;
+        }
+    }
+
+    public boolean isPlayerEnabled(UUID uuid) {
+        return !disabledPlayers.contains(uuid);
     }
 
     public void clearAllMarks() {

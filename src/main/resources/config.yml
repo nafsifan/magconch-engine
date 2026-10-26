@@ -116,15 +116,15 @@ modules:
   mentions:
     enabled: true
 
-  # 标点系统 (潜行+鼠标中键、手持望远镜开镜潜行/左键 或 /magc mark 触发目标高亮)
+  # 标点系统 (潜行+鼠标中键近身标记，望远镜开镜潜行超远侦察)
   mark:
     enabled: true
     # 标记高亮持续时间 (秒)
     duration: 5
     # 防连点冷却时间 (秒)
     cooldown: 1.0
-    # 视线最大探测距离 (格)
-    range: 64.0
+    # 望远镜开镜侦察探测距离 (格)
+    range: 128.0
 
   # 随身工具箱模块
   toolbox:

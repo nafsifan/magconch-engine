@@ -7,8 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -16,9 +14,11 @@ import org.bukkit.inventory.ItemStack;
 /**
  * 标点交互监听器
  * <p>
- * 监听中键拾取触发标点，并在玩家退出时回收瞬态内存状态。
+ * 监听中键拾取（近身 5 格）与手持望远镜开镜潜行（超远距离）触发标点。
  */
 public class MarkPickListener implements Listener {
+
+    private static final double REACH_RANGE = 5.0;
 
     private final MarkModule module;
 
@@ -38,31 +38,7 @@ public class MarkPickListener implements Listener {
         }
 
         event.setCancelled(true);
-        module.performMark(player);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        if (!module.isEnabled()) {
-            return;
-        }
-
-        Action action = event.getAction();
-        if (action != Action.LEFT_CLICK_AIR && action != Action.LEFT_CLICK_BLOCK) {
-            return;
-        }
-
-        Player player = event.getPlayer();
-        ItemStack mainHand = player.getInventory().getItemInMainHand();
-        ItemStack offHand = player.getInventory().getItemInOffHand();
-
-        if (mainHand.getType() != Material.SPYGLASS && offHand.getType() != Material.SPYGLASS) {
-            return;
-        }
-
-        if (module.performMark(player)) {
-            event.setCancelled(true);
-        }
+        module.performMark(player, REACH_RANGE);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -83,7 +59,7 @@ public class MarkPickListener implements Listener {
             return;
         }
 
-        module.performMark(player);
+        module.performMark(player, module.getConfig().getRange());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

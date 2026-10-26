@@ -49,7 +49,12 @@ public class MarkCommand implements SubCommand {
             return true;
         }
 
-        module.performMark(player);
+        boolean enabled = module.toggleMark(player.getUniqueId());
+        if (enabled) {
+            plugin.getLanguageManager().sendMessage(player, "mark.enabled");
+        } else {
+            plugin.getLanguageManager().sendMessage(player, "mark.disabled");
+        }
         return true;
     }
 
