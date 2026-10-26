@@ -86,6 +86,10 @@ commands:
     description: "给予玩家捕捉药水"
   mark:
     description: "标记准星所指的目标"
+  craft:
+    description: "打开随身工作台"
+  stonecutter:
+    description: "打开随身切石机"
 
 creature-bundle:
   item:
@@ -118,3 +122,8 @@ mentions:
 
 compressed-item:
   lore_format: "{color}◈ {level}x 压缩 &r&#8c8c8c({capacity})"
+
+toolbox:
+  craft_title: "&8工作台"
+  stonecutter_title: "&8切石机"
+  disabled: "{prefix}&#ff4d4f该随身工具当前已被管理员禁用。"

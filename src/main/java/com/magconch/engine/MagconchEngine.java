@@ -13,6 +13,7 @@ import com.magconch.engine.modules.mark.MarkModule;
 import com.magconch.engine.modules.mentions.MentionsModule;
 import com.magconch.engine.modules.signcolor.SignColorModule;
 import com.magconch.engine.modules.teleportcost.TeleportCostModule;
+import com.magconch.engine.modules.toolbox.ToolboxModule;
 import com.magconch.engine.modules.showitem.ShowItemModule;
 import com.magconch.engine.modules.trash.TrashModule;
 import com.magconch.engine.modules.undo.BlockUndoModule;
@@ -82,6 +83,7 @@ public class MagconchEngine extends JavaPlugin {
             this.moduleManager.registerModule(new FlightModule(this));
             this.moduleManager.registerModule(new TeleportCostModule(this));
             this.moduleManager.registerModule(new TrashModule(this));
+            this.moduleManager.registerModule(new ToolboxModule(this));
             this.moduleManager.registerModule(new ShowItemModule(this));
             this.moduleManager.registerModule(new CreatureBundleModule(this));
             this.moduleManager.registerModule(new ExpStoreModule(this));

@@ -125,3 +125,11 @@ modules:
     cooldown: 1.0
     # 视线最大探测距离 (格)
     range: 64.0
+
+  # 随身工具箱模块
+  toolbox:
+    enabled: true
+    craft:
+      enabled: true
+    stonecutter:
+      enabled: true

@@ -23,6 +23,14 @@ commands:
     aliases: [ljt]
     permission: magconch.trash.use
     usage: /<command>
+  craft:
+    description: 打开随身工作台
+    permission: magconch.toolbox.craft
+    usage: /<command>
+  stonecutter:
+    description: 打开随身切石机
+    permission: magconch.toolbox.stonecutter
+    usage: /<command>
   showitem:
     description: 向全服展示手中物品
     aliases: [show]
@@ -53,6 +61,8 @@ permissions:
       magconch.mentions.everyone: true
       magconch.mentions.bypass: true
       magconch.use.mark: true
+      magconch.toolbox.craft: true
+      magconch.toolbox.stonecutter: true
   magconch.command.use:
     description: 允许查看基础信息与帮助
     default: true
@@ -109,4 +119,10 @@ permissions:
     default: op
   magconch.use.mark:
     description: 允许使用标点功能
+    default: true
+  magconch.toolbox.craft:
+    description: 允许使用随身工作台指令
+    default: true
+  magconch.toolbox.stonecutter:
+    description: 允许使用随身切石机指令
     default: true
