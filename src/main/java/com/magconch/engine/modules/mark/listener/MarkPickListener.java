@@ -8,13 +8,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
  * 标点交互监听器
  * <p>
- * 监听中键拾取（近身 5 格）与手持望远镜开镜潜行（超远距离）触发标点。
+ * 监听中键拾取（近身 5 格）与手持望远镜开镜按 F 键（超远距离）触发标点。
  */
 public class MarkPickListener implements Listener {
 
@@ -42,8 +42,8 @@ public class MarkPickListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
-        if (!event.isSneaking() || !module.isEnabled()) {
+    public void onPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+        if (!module.isEnabled()) {
             return;
         }
 
@@ -59,6 +59,7 @@ public class MarkPickListener implements Listener {
             return;
         }
 
+        event.setCancelled(true);
         module.performMark(player, module.getConfig().getRange());
     }
 
