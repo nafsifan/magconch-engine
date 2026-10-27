@@ -5,6 +5,7 @@ import com.magconch.engine.api.EngineModule;
 import com.magconch.engine.modules.mark.command.MarkCommand;
 import com.magconch.engine.modules.mark.config.MarkConfig;
 import com.magconch.engine.modules.mark.listener.MarkPickListener;
+import com.magconch.engine.modules.mark.util.BlockOffsetHelper;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -20,6 +21,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Transformation;
+import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
@@ -177,8 +179,9 @@ public class MarkModule implements EngineModule {
                 }
             }, null);
         } else {
-            soundLocation = hitBlock.getLocation().add(0.5, 0.5, 0.5);
-            Location spawnLoc = hitBlock.getLocation();
+            Vector offset = BlockOffsetHelper.getOffset(hitBlock);
+            soundLocation = hitBlock.getLocation().add(0.5, 0.5, 0.5).add(offset);
+            Location spawnLoc = hitBlock.getLocation().add(offset);
 
             BlockDisplay marker = hitBlock.getWorld().spawn(spawnLoc, BlockDisplay.class, display -> {
                 display.setBlock(hitBlock.getBlockData());
